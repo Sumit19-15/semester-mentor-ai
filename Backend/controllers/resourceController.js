@@ -23,3 +23,13 @@ export const createResource = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getResources = async (req, res) => {
+  try {
+    const resources = await Resource.find({ user: req.user._id }).sort({ createdAt: -1 });
+
+    res.status(200).json(resources);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
