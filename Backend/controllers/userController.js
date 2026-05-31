@@ -12,6 +12,7 @@ export const registerUser = async (req, res) => {
       semester,
       interests,
       dailyFreeHours,
+      subjects,
     } = req.body;
 
     if (!name || !email || !password) {
@@ -36,6 +37,7 @@ export const registerUser = async (req, res) => {
       semester,
       interests,
       dailyFreeHours,
+      subjects,
     });
 
     if (user) {
@@ -70,6 +72,7 @@ export const loginUser = async (req, res) => {
         semester: user.semester,
         interests: user.interests,
         dailyFreeHours: user.dailyFreeHours,
+        subjects: user.subjects,
         token: generateToken(user._id),
       });
     } else {
@@ -92,8 +95,47 @@ export const getUserProfile = async (req, res) => {
       semester: req.user.semester,
       interests: req.user.interests,
       dailyFreeHours: req.user.dailyFreeHours,
+      subjects: req.user.subjects,
     });
   } else {
     res.status(404).json({ message: "User not found" });
+  }
+};
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      user.collegeName = req.body.collegeName || user.collegeName;
+      user.branch = req.body.branch || user.branch;
+      user.semester = req.body.semester || user.semester;
+      user.interests = req.body.interests || user.interests;
+      user.dailyFreeHours = req.body.dailyFreeHours || user.dailyFreeHours;
+      user.subjects = req.body.subjects || user.subjects;
+
+      if (req.body.password) {
+        user.password = req.body.password;
+      }
+
+      const updatedUser = await user.save();
+
+      res.status(200).json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        subjects: updatedUser.subjects,
+        interests: updatedUser.interests,
+        dailyFreeHours: updatedUser.dailyFreeHours,
+      });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error in updateUserProfile: " + error.message });
   }
 };
