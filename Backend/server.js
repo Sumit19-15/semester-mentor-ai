@@ -5,6 +5,8 @@ import "dotenv/config";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
+import subjectRoutes from "./routes/subjectRoutes.js";
+import topicRoutes from "./routes/topicRoutes.js";
 
 connectDB();
 
@@ -14,6 +16,8 @@ app.use(express.json());
 
 app.use("/api/users", userRoutes);
 app.use("/api/resources", resourceRoutes);
+app.use("/api/subjects", subjectRoutes);
+app.use("/api/topics", topicRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Semester Mentor API is running!" });
