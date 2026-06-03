@@ -7,6 +7,8 @@ import userRoutes from "./routes/userRoutes.js";
 import resourceRoutes from "./routes/resourceRoutes.js";
 import subjectRoutes from "./routes/subjectRoutes.js";
 import topicRoutes from "./routes/topicRoutes.js";
+import noteRoutes from './routes/noteRoutes.js';
+import pyqRoutes from './routes/pyqRoutes.js';
 
 connectDB();
 
@@ -18,6 +20,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/topics", topicRoutes);
+app.use('/api/notes', noteRoutes);
+app.use('/api/pyqs', pyqRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Semester Mentor API is running!" });
