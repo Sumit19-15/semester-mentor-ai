@@ -14,7 +14,6 @@ const noteSchema = mongoose.Schema(
     },
     topic: {
       type: mongoose.Schema.Types.ObjectId,
-      // Removed `required: true` here so it is now optional!
       ref: "Topic",
     },
     title: {
