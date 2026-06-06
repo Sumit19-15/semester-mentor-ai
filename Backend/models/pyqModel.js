@@ -12,14 +12,6 @@ const pyqSchema = mongoose.Schema(
       required: true,
       ref: "Subject",
     },
-    topic: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Topic",
-    },
-    title: {
-      type: String,
-      required: true,
-    },
     fileUrl: {
       type: String,
       required: true,

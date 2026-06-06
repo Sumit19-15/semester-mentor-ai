@@ -5,19 +5,19 @@ import Pyq from "../models/pyqModel.js";
 // @access  Private
 export const createPyq = async (req, res) => {
   try {
-    const { subject, topic, title, fileUrl, year } = req.body;
+    const { subject, year } = req.body;
 
-    if (!subject || !title || !fileUrl || !year) {
+    if (!subject || !year) {
       return res
         .status(400)
-        .json({ message: "Subject, title, fileUrl, and year are required." });
+        .json({ message: "Subject and Year are required." });
     }
+
+    const fileUrl = `/${req.file.path}`;
 
     const pyq = await Pyq.create({
       user: req.user._id,
       subject,
-      topic, // Optional, as some PYQs cover the whole subject
-      title,
       fileUrl,
       year,
     });
@@ -33,9 +33,10 @@ export const createPyq = async (req, res) => {
 // @access  Private
 export const getPyqs = async (req, res) => {
   try {
-    const pyqs = await Pyq.find({ user: req.user._id })
-      .populate("subject", "name")
-      .populate("topic", "title");
+    const pyqs = await Pyq.find({ user: req.user._id }).populate(
+      "subject",
+      "name",
+    );
 
     res.status(200).json(pyqs);
   } catch (error) {

@@ -5,26 +5,26 @@ import Note from "../models/noteModel.js";
 // @access  Private
 export const createNote = async (req, res) => {
   try {
-    const { subject, topic, title, fileUrl, description } = req.body;
+    const { subject, topic, title, description } = req.body;
 
-    if (!subject || !topic || !title || !fileUrl) {
-      return res
-        .status(400)
-        .json({ message: "Subject, topic, title, and fileUrl are required." });
+    if (!req.file) {
+      return res.status(400).json({ message: "Please upload a file" });
     }
+
+    const fileUrl = `/${req.file.path}`;
 
     const note = await Note.create({
       user: req.user._id,
       subject,
       topic,
       title,
-      fileUrl,
       description,
+      fileUrl,
     });
 
     res.status(201).json(note);
   } catch (error) {
-    res.status(500).json({ message: "Server Error", error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
