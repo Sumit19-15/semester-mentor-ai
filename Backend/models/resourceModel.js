@@ -27,7 +27,7 @@ const resourceSchema = mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "youtube",
+        "youtube video",
         "pdf",
         "article",
         "documentation",

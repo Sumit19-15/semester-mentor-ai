@@ -34,7 +34,6 @@ const userSchema = new mongoose.Schema(
     },
     dailyFreeHours: {
       type: Number,
-      required: true,
     },
     subjects: {
       type: [String],
