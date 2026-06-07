@@ -34,7 +34,13 @@ export const createResource = async (req, res) => {
 // @access  Private
 export const getResources = async (req, res) => {
   try {
-    const resources = await Resource.find({ user: req.user._id })
+    const query = { user: req.user._id };
+
+    if (req.query.subject) {
+      query.subject = req.query.subject;
+    }
+
+    const resources = await Resource.find(query)
       .populate("subject", "name")
       .populate("topic", "title");
 

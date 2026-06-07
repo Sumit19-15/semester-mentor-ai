@@ -33,10 +33,15 @@ export const createPyq = async (req, res) => {
 // @access  Private
 export const getPyqs = async (req, res) => {
   try {
-    const pyqs = await Pyq.find({ user: req.user._id }).populate(
-      "subject",
-      "name",
-    );
+    const query = { user: req.user._id };
+
+    if (req.query.subject) {
+      query.subject = req.query.subject;
+    }
+
+    const pyqs = await Pyq.find(query)
+      .populate("subject", "name")
+      .populate("topic", "title");
 
     res.status(200).json(pyqs);
   } catch (error) {

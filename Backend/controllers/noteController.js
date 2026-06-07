@@ -33,7 +33,13 @@ export const createNote = async (req, res) => {
 // @access  Private
 export const getNotes = async (req, res) => {
   try {
-    const notes = await Note.find({ user: req.user._id })
+    const query = { user: req.user._id };
+
+    if (req.query.subject) {
+      query.subject = req.query.subject;
+    }
+
+    const notes = await Note.find(query)
       .populate("subject", "name")
       .populate("topic", "title");
 
