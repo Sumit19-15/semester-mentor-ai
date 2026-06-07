@@ -13,6 +13,10 @@ export const createPyq = async (req, res) => {
         .json({ message: "Subject and Year are required." });
     }
 
+    if (!req.file) {
+      return res.status(400).json({ message: "Please upload a file" });
+    }
+
     const fileUrl = `/${req.file.path}`;
 
     const pyq = await Pyq.create({
@@ -39,9 +43,7 @@ export const getPyqs = async (req, res) => {
       query.subject = req.query.subject;
     }
 
-    const pyqs = await Pyq.find(query)
-      .populate("subject", "name")
-      .populate("topic", "title");
+    const pyqs = await Pyq.find(query).populate("subject", "name");
 
     res.status(200).json(pyqs);
   } catch (error) {
