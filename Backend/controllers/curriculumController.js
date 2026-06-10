@@ -3,7 +3,7 @@ import fs from "fs";
 import Subject from "../models/subjectModel.js";
 import Topic from "../models/topicModel.js";
 
-const ai = new GoogleGenAI(); // It automatically uses process.env.GEMINI_API_KEY
+const ai = new GoogleGenAI({}); // It automatically uses process.env.GEMINI_API_KEY
 
 // ==========================================
 // FEATURE 1: Extract Subjects & Course Codes
@@ -55,12 +55,10 @@ export const parseSubjectsFromCurriculum = async (req, res) => {
     const savedSubjects = await Subject.insertMany(subjectsToSave);
     fs.unlinkSync(req.file.path); // Clean up the temp file
 
-    res
-      .status(201)
-      .json({
-        message: `Added ${savedSubjects.length} subjects!`,
-        subjects: savedSubjects,
-      });
+    res.status(201).json({
+      message: `Added ${savedSubjects.length} subjects!`,
+      subjects: savedSubjects,
+    });
   } catch (error) {
     if (req.file) fs.unlinkSync(req.file.path);
     res
@@ -111,6 +109,7 @@ export const parseTopicsForSubject = async (req, res) => {
 
     // Map the array to link directly to the Subject ID
     const topicsToSave = topicsArray.map((topic) => ({
+      user: req.user._id,
       subject: subjectId,
       title: topic.title,
       completed: false, // Default tracking state
@@ -119,12 +118,10 @@ export const parseTopicsForSubject = async (req, res) => {
     const savedTopics = await Topic.insertMany(topicsToSave);
     fs.unlinkSync(req.file.path); // Clean up
 
-    res
-      .status(201)
-      .json({
-        message: `Added ${savedTopics.length} topics!`,
-        topics: savedTopics,
-      });
+    res.status(201).json({
+      message: `Added ${savedTopics.length} topics!`,
+      topics: savedTopics,
+    });
   } catch (error) {
     if (req.file) fs.unlinkSync(req.file.path);
     res
