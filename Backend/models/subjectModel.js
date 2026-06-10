@@ -11,6 +11,10 @@ const subjectSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    courseCode: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,
