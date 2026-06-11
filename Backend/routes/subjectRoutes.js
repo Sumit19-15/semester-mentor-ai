@@ -3,7 +3,7 @@ import {
   createSubject,
   getSubjects,
 } from "../controllers/subjectController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect } from "../middleware/authmiddleware.js";
 import { parseSubjectsFromCurriculum } from "../controllers/curriculumController.js";
 import upload from "../middleware/uploadMiddleware.js";
 

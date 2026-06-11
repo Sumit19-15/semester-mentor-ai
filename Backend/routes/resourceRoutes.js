@@ -3,7 +3,7 @@ import {
   createResource,
   getResources,
 } from "../controllers/resourceController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect } from "../middleware/authmiddleware.js";
 
 const router = express.Router();
 

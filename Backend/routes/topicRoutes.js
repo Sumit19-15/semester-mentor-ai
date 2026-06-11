@@ -1,6 +1,6 @@
 import express from "express";
 import { createTopic, completeTopic } from "../controllers/topicController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect } from "../middleware/authmiddleware.js";
 import { parseTopicsForSubject } from "../controllers/curriculumController.js";
 import upload from "../middleware/uploadMiddleware.js";
 
