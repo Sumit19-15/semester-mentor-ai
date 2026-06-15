@@ -1,0 +1,96 @@
+import { create } from 'zustand';
+import api from '../services/api';
+
+export const useChatStore = create((set, get) => ({
+  sessions: [], // Array of ChatSession objects
+  activeSession: null,
+  activeMessages: [], // Messages for the active session
+  isLoading: false,
+  isSending: false,
+  error: null,
+
+  // Fetch chat sessions (can be filtered by type, subject, topic)
+  fetchSessions: async (filters = {}) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { type, subjectId, topicId } = filters;
+      let query = '?';
+      if (type) query += `type=${type}&`;
+      if (subjectId) query += `subjectId=${subjectId}&`;
+      if (topicId) query += `topicId=${topicId}&`;
+
+      const response = await api.get(`/chats${query}`);
+      set({ sessions: response.data, isLoading: false });
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to fetch sessions', isLoading: false });
+    }
+  },
+
+  // Create a new chat session
+  createSession: async (sessionData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post('/chats', sessionData);
+      set((state) => ({ 
+        sessions: [response.data, ...state.sessions],
+        activeSession: response.data,
+        activeMessages: [], // brand new session has no messages
+        isLoading: false 
+      }));
+      return response.data;
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to create session', isLoading: false });
+      throw error;
+    }
+  },
+
+  // Set the active session and fetch its messages
+  setActiveSession: async (session) => {
+    set({ activeSession: session, isLoading: true, error: null });
+    if (!session) {
+      set({ activeMessages: [], isLoading: false });
+      return;
+    }
+
+    try {
+      const response = await api.get(`/chats/${session._id}/messages`);
+      set({ activeMessages: response.data, isLoading: false });
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to fetch messages', isLoading: false });
+    }
+  },
+
+  // Send a message in the active session
+  sendMessage: async (content) => {
+    const { activeSession, activeMessages } = get();
+    if (!activeSession) return;
+
+    // Optimistically add user message
+    const tempId = Date.now().toString();
+    const optimisticUserMsg = { _id: tempId, role: 'user', content, createdAt: new Date().toISOString() };
+    
+    set({ 
+      activeMessages: [...activeMessages, optimisticUserMsg],
+      isSending: true,
+      error: null
+    });
+
+    try {
+      const response = await api.post(`/chats/${activeSession._id}/message`, { content });
+      
+      // response.data contains { userMessage, aiMessage }
+      // Replace optimistic message and append AI message
+      set((state) => ({
+        activeMessages: state.activeMessages.map(msg => msg._id === tempId ? response.data.userMessage : msg).concat(response.data.aiMessage),
+        isSending: false
+      }));
+    } catch (error) {
+      // Remove optimistic message on failure
+      set((state) => ({ 
+        activeMessages: state.activeMessages.filter(msg => msg._id !== tempId),
+        error: error.response?.data?.message || 'Failed to send message', 
+        isSending: false 
+      }));
+    }
+  }
+}));

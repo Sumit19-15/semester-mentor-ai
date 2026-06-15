@@ -14,7 +14,6 @@ export default function SideNavBar() {
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
     { name: 'Subjects', icon: BookOpen, path: '/subjects' },
-    { name: 'Modules', icon: Folder, path: '/module-chat' },
     { name: 'Chats', icon: GraduationCap, path: '/chats' },
   ];
 
@@ -44,7 +43,6 @@ export default function SideNavBar() {
               to={item.path}
               className={({ isActive }) =>
                 `flex items-center gap-4 px-3 py-2 rounded-lg font-body-md text-[14px] transition-colors duration-150 cursor-pointer ${isActive ||
-                  (item.path === '/module-chat' && location.pathname.startsWith('/module-chat')) ||
                   (item.path === '/chats' && location.pathname.startsWith('/chats')) ||
                   (item.path === '/subjects' && location.pathname.startsWith('/subjects'))
                   ? 'bg-primary-container/20 text-primary font-semibold border-l-[3px] border-primary rounded-l-none'

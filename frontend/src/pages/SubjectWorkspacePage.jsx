@@ -1,22 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Share2, PlayCircle, BookOpen, Plus } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import SubjectOverviewTab from '../components/SubjectOverviewTab';
 import SubjectNotesTab from '../components/SubjectNotesTab';
 import SubjectResourcesTab from '../components/SubjectResourcesTab';
 import SubjectPyqsTab from '../components/SubjectPyqsTab';
+import { useSubjectStore } from '../store/useSubjectStore';
 
 export default function SubjectWorkspacePage() {
   const [activeTab, setActiveTab] = useState('Topics');
   
-  const subjects = [
-    { id: 1, name: 'Database Management Systems', semester: 'Semester 4', dept: 'Computer Science' },
-    { id: 2, name: 'Data Structures & Algorithms', semester: 'Semester 4', dept: 'Computer Science' },
-    { id: 3, name: 'Linear Algebra', semester: 'Semester 4', dept: 'Mathematics' },
-    { id: 4, name: 'Human-Computer Interaction', semester: 'Semester 4', dept: 'Design' }
-  ];
-  
-  const [activeSubject, setActiveSubject] = useState(subjects[0]);
+  const { subjects, activeSubject, setActiveSubject, fetchSubjects, isLoading } = useSubjectStore();
+
+  useEffect(() => {
+    if (subjects.length === 0) {
+      fetchSubjects();
+    }
+  }, [subjects.length, fetchSubjects]);
+
+  if (isLoading || !activeSubject) {
+    return (
+      <DashboardLayout>
+        <div className="flex w-full h-full items-center justify-center">
+          <span className="text-secondary">Loading workspace...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -42,13 +52,13 @@ export default function SubjectWorkspacePage() {
             
             {subjects.map((sub) => (
               <button 
-                key={sub.id}
+                key={sub._id}
                 onClick={() => setActiveSubject(sub)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between group ${activeSubject.id === sub.id ? 'bg-surface-container-high' : 'hover:bg-surface-container'}`}
+                className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between group ${activeSubject._id === sub._id ? 'bg-surface-container-high' : 'hover:bg-surface-container'}`}
               >
                 <div className="flex flex-col gap-0.5 overflow-hidden">
-                  <span className={`font-label-md text-[14px] font-semibold truncate transition-colors ${activeSubject.id === sub.id ? 'text-primary' : 'text-on-surface group-hover:text-primary'}`}>{sub.name}</span>
-                  <span className="font-label-sm text-[10px] text-on-surface-variant truncate">{sub.dept} • {sub.semester}</span>
+                  <span className={`font-label-md text-[14px] font-semibold truncate transition-colors ${activeSubject._id === sub._id ? 'text-primary' : 'text-on-surface group-hover:text-primary'}`}>{sub.name}</span>
+                  <span className="font-label-sm text-[10px] text-on-surface-variant truncate">{sub.courseCode || 'Course'}</span>
                 </div>
               </button>
             ))}
@@ -61,9 +71,7 @@ export default function SubjectWorkspacePage() {
             {/* Page Header */}
             <div className="mb-8" data-purpose="workspace-header">
               <div className="flex items-center font-label-sm text-[12px] text-secondary uppercase tracking-widest mb-3 font-semibold">
-                <span>{activeSubject.dept}</span>
-                <span className="mx-2 text-outline-variant">•</span>
-                <span>{activeSubject.semester}</span>
+                <span>{activeSubject.courseCode || 'Course'}</span>
               </div>
               <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                 <h1 className="font-display-lg text-[32px] font-bold text-on-surface tracking-tight max-w-2xl leading-tight">

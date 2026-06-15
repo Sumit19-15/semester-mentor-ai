@@ -1,12 +1,19 @@
+import { useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { useSubjectStore } from '../store/useSubjectStore';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { FileText, Plus, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const { subjects, fetchSubjects, isLoading } = useSubjectStore();
   const navigate = useNavigate();
   const userName = user?.name?.split(' ')[0] || 'Student';
+
+  useEffect(() => {
+    fetchSubjects();
+  }, [fetchSubjects]);
 
   // Format today's date
   const today = new Date().toLocaleDateString('en-US', {
@@ -36,58 +43,40 @@ export default function DashboardPage() {
           <button className="font-label-md text-label-md text-primary hover:underline cursor-pointer">View All</button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-stack_md">
-          {/* Subject Card 1 */}
-          <div className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px]">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-headline-sm text-headline-sm text-on-surface leading-tight">Data Structures & Algorithms</h4>
-              <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ml-2">Fall '23</span>
-            </div>
-            <div className="mt-auto pt-4">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-label-sm text-label-sm text-secondary">Syllabus Completion</span>
-                <span className="font-label-sm text-label-sm text-on-surface-variant">65%</span>
-              </div>
-              <div className="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
-                <div className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '65%' }}></div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Subject Card 2 */}
-          <div className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px]">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-headline-sm text-headline-sm text-on-surface leading-tight">Linear Algebra</h4>
-              <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ml-2">Fall '23</span>
-            </div>
-            <div className="mt-auto pt-4">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-label-sm text-label-sm text-secondary">Syllabus Completion</span>
-                <span className="font-label-sm text-label-sm text-on-surface-variant">42%</span>
-              </div>
-              <div className="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
-                <div className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '42%' }}></div>
-              </div>
-            </div>
-          </div>
+        {isLoading ? (
+          <div className="text-secondary">Loading subjects...</div>
+        ) : subjects.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-stack_md">
+            {subjects.slice(0, 3).map((sub) => {
+              // Calculate completion percentage based on topics if available
+              const completedTopics = sub.topics?.filter(t => t.completed).length || 0;
+              const totalTopics = sub.topics?.length || 1;
+              const completion = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
-          {/* Subject Card 3 */}
-          <div className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px]">
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="font-headline-sm text-headline-sm text-on-surface leading-tight">Human-Computer Interaction</h4>
-              <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ml-2">Fall '23</span>
-            </div>
-            <div className="mt-auto pt-4">
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-label-sm text-label-sm text-secondary">Syllabus Completion</span>
-                <span className="font-label-sm text-label-sm text-on-surface-variant">88%</span>
-              </div>
-              <div className="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
-                <div className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '88%' }}></div>
-              </div>
-            </div>
+              return (
+                <div key={sub._id} className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px]" onClick={() => navigate('/subjects')}>
+                  <div className="flex justify-between items-start mb-4">
+                    <h4 className="font-headline-sm text-headline-sm text-on-surface leading-tight">{sub.name}</h4>
+                    <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ml-2">{sub.courseCode || 'Course'}</span>
+                  </div>
+                  <div className="mt-auto pt-4">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-label-sm text-label-sm text-secondary">Syllabus Completion</span>
+                      <span className="font-label-sm text-label-sm text-on-surface-variant">{completion}%</span>
+                    </div>
+                    <div className="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+                      <div className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${completion}%` }}></div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        ) : (
+          <div className="text-secondary bg-surface-container-lowest p-6 rounded-lg border border-outline-variant text-center">
+            No subjects found. Let's add some to your workspace!
+          </div>
+        )}
       </section>
 
       {/* Section 2: Modules */}

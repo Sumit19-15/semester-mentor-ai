@@ -20,6 +20,7 @@ export default function TopNavBar() {
   const isMarketingPage = location.pathname === '/';
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
   const isDashboardPage = location.pathname === '/dashboard' || 
+                          location.pathname.startsWith('/subjects') ||
                           location.pathname.startsWith('/module-chat') || 
                           location.pathname.startsWith('/chats') || 
                           location.pathname.startsWith('/settings');
