@@ -1,7 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useThemeStore } from './store/themeStore';
+import TopNavBar from './components/TopNavBar';
 import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import OnboardingPage from './pages/OnboardingPage';
 
 function App() {
   const theme = useThemeStore((state) => state.theme);
@@ -18,11 +21,12 @@ function App() {
 
   return (
     <Router>
+      <TopNavBar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        {/* Placeholder routes to avoid errors when clicking links on LandingPage */}
-        <Route path="/login" element={<div>Login Page (WIP)</div>} />
-        <Route path="/register" element={<div>Register Page (WIP)</div>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<OnboardingPage />} />
+        <Route path="/dashboard" element={<div>Dashboard (WIP)</div>} />
       </Routes>
     </Router>
   );

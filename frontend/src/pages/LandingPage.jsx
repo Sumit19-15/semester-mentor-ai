@@ -1,12 +1,9 @@
 import { Link } from 'react-router-dom';
-import MarketingNavBar from '../components/MarketingNavBar';
 import Footer from '../components/Footer';
 
 export default function LandingPage() {
   return (
     <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
-      <MarketingNavBar />
-      
       <main className="flex-grow pt-[120px] pb-stack_lg px-gutter max-w-container_max_width mx-auto w-full flex flex-col items-center justify-center">
         {/* Hero Section */}
         <section className="text-center w-full max-w-3xl flex flex-col items-center gap-stack_lg mb-[80px]">
