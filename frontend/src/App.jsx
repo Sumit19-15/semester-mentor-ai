@@ -8,6 +8,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import DashboardPage from './pages/DashboardPage';
 import MentorChatPage from './pages/MentorChatPage';
 import SubjectWorkspacePage from './pages/SubjectWorkspacePage';
+import AiProjectChatPage from './pages/AiProjectChatPage';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
             <MentorChatPage />
           </DashboardLayout>
         } />
+        <Route path="/project-chat" element={<AiProjectChatPage />} />
       </Routes>
     </Router>
   );

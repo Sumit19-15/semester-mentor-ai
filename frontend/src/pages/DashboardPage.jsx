@@ -1,9 +1,11 @@
 import { useAuthStore } from '../store/authStore';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { FileText, Plus, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const userName = user?.name?.split(' ')[0] || 'Student';
 
   // Format today's date
@@ -88,13 +90,13 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Section 2: Mentor Projects */}
+      {/* Section 2: Modules */}
       <section>
         <div className="flex justify-between items-center mb-stack_md">
-          <h3 className="font-headline-sm text-headline-sm text-on-surface">Mentor Projects</h3>
+          <h3 className="font-headline-sm text-headline-sm text-on-surface">Modules</h3>
           <button className="font-label-md text-label-md text-on-background bg-surface-container-lowest border border-surface-variant rounded-lg px-3 py-1.5 hover:bg-surface-container-low transition-colors flex items-center gap-1 cursor-pointer">
             <Plus className="w-4 h-4" />
-            New Project
+            New Module
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-stack_sm">
@@ -105,7 +107,11 @@ export default function DashboardPage() {
             { title: "Usability Study Results", time: "Last active 1 week ago" },
             { title: "Semester Reading List", time: "Last active 2 weeks ago" }
           ].map((project, idx) => (
-            <div key={idx} className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_sm flex items-start gap-3 hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer group">
+            <div 
+              key={idx} 
+              onClick={() => navigate('/project-chat')}
+              className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_sm flex items-start gap-3 hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer group"
+            >
               <div className="w-10 h-10 rounded bg-secondary-container/30 flex items-center justify-center text-primary group-hover:bg-primary-container/20 transition-colors shrink-0">
                 <FileText className="w-5 h-5" />
               </div>

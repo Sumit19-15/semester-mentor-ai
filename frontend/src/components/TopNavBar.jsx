@@ -19,7 +19,11 @@ export default function TopNavBar() {
 
   const isMarketingPage = location.pathname === '/';
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  const isDashboardPage = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/subjects') || location.pathname.startsWith('/chats') || location.pathname.startsWith('/settings');
+  const isDashboardPage = location.pathname.startsWith('/dashboard') || 
+                          location.pathname.startsWith('/subjects') || 
+                          location.pathname.startsWith('/chats') || 
+                          location.pathname.startsWith('/project-chat') || 
+                          location.pathname.startsWith('/settings');
 
   // If dashboard, it shifts right by 240px on desktop
   const navClasses = isDashboardPage

@@ -1,61 +1,89 @@
-import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, LayoutDashboard, Library, MessageSquare, Settings } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  BookOpen,
+  GraduationCap,
+  Settings,
+  LogOut,
+  Folder,
+} from 'lucide-react';
 
 export default function SideNavBar() {
   const location = useLocation();
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Subjects', path: '/subjects', icon: Library },
-    { name: 'Chats', path: '/chats', icon: MessageSquare },
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { name: 'Subjects', icon: BookOpen, path: '/subjects' },
+    { name: 'Modules', icon: Folder, path: '/project-chat' },
+    { name: 'Chats', icon: GraduationCap, path: '/chats' },
   ];
 
   return (
-    <nav className="w-[240px] h-screen fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant hidden md:flex flex-col py-stack_md z-20">
-      <div className="px-gutter mb-stack_lg flex items-center gap-2">
-        <BookOpen className="text-primary w-6 h-6 shrink-0" />
+    <nav className="w-64 h-screen fixed left-0 top-0 bg-surface border-r border-outline-variant flex flex-col pt-6 pb-4 z-20">
+      {/* Brand area */}
+      <div className="px-6 mb-8 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0">
+          <GraduationCap className="w-5 h-5 text-on-primary-container" />
+        </div>
+
         <div>
-          <h1 className="font-headline-sm text-[16px] leading-[20px] font-bold text-primary">Semester Mentor</h1>
-          <p className="font-label-sm text-[11px] text-secondary">Academic Planner</p>
+          <h1 className="font-headline-sm text-[18px] font-bold text-primary tracking-tight leading-tight">
+            Semester Mentor
+          </h1>
+          <p className="font-label-sm text-[11px] text-secondary leading-none mt-1">
+            Academic Planner
+          </p>
         </div>
       </div>
-      
-      <ul className="flex flex-col w-full font-body-md text-body-md flex-1">
-        {navItems.map((item) => {
-          const isActive = location.pathname.startsWith(item.path);
-          const Icon = item.icon;
-          
-          return (
-            <li key={item.name}>
-              <Link 
-                to={item.path}
-                className={`flex items-center gap-3 px-gutter py-2 cursor-pointer active:scale-95 transition-colors duration-150 border-l-[3px] ${
-                  isActive 
-                    ? 'bg-primary-container/10 text-primary font-semibold border-primary' 
-                    : 'text-secondary hover:bg-secondary-container/50 border-transparent'
-                }`}
-              >
-                <Icon className="w-5 h-5 shrink-0" />
-                {item.name}
-              </Link>
-            </li>
-          );
-        })}
-        
-        <li className="mt-auto">
-          <Link 
-            to="/settings"
-            className={`flex items-center gap-3 px-gutter py-2 cursor-pointer active:scale-95 transition-colors duration-150 border-l-[3px] ${
-              location.pathname === '/settings'
-                ? 'bg-primary-container/10 text-primary font-semibold border-primary'
-                : 'text-secondary hover:bg-secondary-container/50 border-transparent'
-            }`}
-          >
-            <Settings className="w-5 h-5 shrink-0" />
-            Settings
-          </Link>
-        </li>
+
+      {/* Main Navigation */}
+      <ul className="flex-1 flex flex-col gap-1 px-3">
+        {navItems.map((item) => (
+          <li key={item.name}>
+            <NavLink
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-4 px-3 py-2 rounded-lg font-body-md text-[14px] transition-colors duration-150 cursor-pointer ${isActive ||
+                  (item.name === 'Chats' &&
+                    location.pathname.startsWith('/chats')) ||
+                  (item.name === 'Modules' &&
+                    location.pathname.startsWith('/project-chat')) ||
+                  (item.name === 'Subjects' &&
+                    location.pathname.startsWith('/subjects'))
+                  ? 'bg-primary-container/20 text-primary font-semibold border-l-[3px] border-primary rounded-l-none'
+                  : 'text-secondary hover:bg-surface-container hover:text-on-surface'
+                }`
+              }
+            >
+              <item.icon className="w-5 h-5" />
+              {item.name}
+            </NavLink>
+          </li>
+        ))}
       </ul>
+
+      {/* Bottom User Area */}
+      <div className="px-3 mt-auto pt-4 border-t border-outline-variant/50 flex flex-col gap-1">
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            `w-full flex items-center gap-4 px-3 py-2 rounded-lg font-body-md text-[14px] transition-colors duration-150 cursor-pointer ${isActive
+              ? 'bg-primary-container/20 text-primary font-semibold border-l-[3px] border-primary rounded-l-none'
+              : 'text-secondary hover:bg-surface-container hover:text-on-surface'
+            }`
+          }
+        >
+          <Settings className="w-5 h-5" />
+          Settings
+        </NavLink>
+
+        <button className="w-full flex items-center gap-4 px-3 py-2 rounded-lg text-secondary hover:bg-error-container hover:text-on-error-container transition-colors duration-150 cursor-pointer text-left">
+          <LogOut className="w-5 h-5" />
+          <span className="font-body-md text-[14px] font-medium">
+            Log out
+          </span>
+        </button>
+      </div>
     </nav>
   );
 }
