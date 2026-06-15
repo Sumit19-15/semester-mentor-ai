@@ -1,16 +1,19 @@
-import { useState, useEffect } from 'react';
-import { Share2, PlayCircle, BookOpen, Plus } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Share2, PlayCircle, BookOpen, Plus, Upload, Loader2 } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import SubjectOverviewTab from '../components/SubjectOverviewTab';
 import SubjectNotesTab from '../components/SubjectNotesTab';
 import SubjectResourcesTab from '../components/SubjectResourcesTab';
 import SubjectPyqsTab from '../components/SubjectPyqsTab';
 import { useSubjectStore } from '../store/useSubjectStore';
+import api from '../services/api';
 
 export default function SubjectWorkspacePage() {
   const [activeTab, setActiveTab] = useState('Topics');
+  const [isParsing, setIsParsing] = useState(false);
+  const fileInputRef = useRef(null);
   
-  const { subjects, activeSubject, setActiveSubject, fetchSubjects, isLoading } = useSubjectStore();
+  const { subjects, activeSubject, setActiveSubject, fetchSubjects, fetchTopicsForSubject, isLoading } = useSubjectStore();
 
   useEffect(() => {
     if (subjects.length === 0) {
@@ -27,6 +30,33 @@ export default function SubjectWorkspacePage() {
       </DashboardLayout>
     );
   }
+
+  const handleSyllabusUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsParsing(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      await api.post(`/topics/${activeSubject._id}/parse-topics`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      // Refresh topics
+      if (fetchTopicsForSubject) {
+        await fetchTopicsForSubject(activeSubject._id);
+      }
+      setActiveTab('Topics');
+    } catch (error) {
+      console.error("Failed to parse topics", error);
+      alert("Failed to parse topics from syllabus.");
+    } finally {
+      setIsParsing(false);
+      e.target.value = null; // Reset input
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -78,9 +108,20 @@ export default function SubjectWorkspacePage() {
                   {activeSubject.name}
                 </h1>
                 <div className="flex gap-3 shrink-0">
-                  <button className="flex items-center gap-2 px-4 py-2 border border-outline-variant bg-surface-container-lowest rounded-lg font-label-md text-[14px] font-semibold text-on-surface hover:bg-surface-container transition-all shadow-sm">
-                    <Share2 className="w-4 h-4 text-secondary" />
-                    Share
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    onChange={handleSyllabusUpload}
+                    accept="image/*,.pdf"
+                    className="hidden"
+                  />
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isParsing}
+                    className="flex items-center gap-2 px-4 py-2 border border-outline-variant bg-surface-container-lowest rounded-lg font-label-md text-[14px] font-semibold text-on-surface hover:bg-surface-container transition-all shadow-sm disabled:opacity-50"
+                  >
+                    {isParsing ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Upload className="w-4 h-4 text-primary" />}
+                    {isParsing ? 'Parsing...' : 'Upload Syllabus'}
                   </button>
                   <button className="flex items-center gap-2 px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md text-[14px] font-semibold hover:opacity-90 transition-all shadow-sm">
                     <PlayCircle className="w-4 h-4" />

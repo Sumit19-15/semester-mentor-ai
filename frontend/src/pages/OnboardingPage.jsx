@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowLeft } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Upload, FileText } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import api from '../services/api';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -18,6 +19,7 @@ export default function OnboardingPage() {
   
   // Step 3 State
   const [goals, setGoals] = useState('');
+  const [curriculumFile, setCurriculumFile] = useState(null);
   
   const [isLoading, setIsLoading] = useState(false);
   
@@ -47,6 +49,16 @@ export default function OnboardingPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       // Upon successful registration, authenticate the user
       login({ email, name: fullName, university, major, semester, goals });
+      
+      // If a curriculum file was uploaded, parse it to generate subjects
+      if (curriculumFile) {
+        const formData = new FormData();
+        formData.append("file", curriculumFile);
+        await api.post("/subjects/parse-index", formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
       navigate('/dashboard'); 
     } catch (error) {
       console.error("Registration failed", error);
@@ -196,6 +208,39 @@ export default function OnboardingPage() {
                     onChange={(e) => setGoals(e.target.value)}
                     required
                   ></textarea>
+                </div>
+                
+                <div className="flex flex-col space-y-stack_sm mt-4">
+                  <label className="font-label-md text-label-md text-on-surface" htmlFor="curriculum">Upload Curriculum (Optional)</label>
+                  <p className="font-body-sm text-secondary text-xs mb-2">
+                    Upload your course index or syllabus to automatically extract your subjects.
+                  </p>
+                  <div className="w-full border-2 border-dashed border-outline-variant rounded-lg p-6 flex flex-col items-center justify-center hover:bg-surface-container transition-colors relative">
+                    <input 
+                      type="file" 
+                      id="curriculum" 
+                      accept="image/*,.pdf"
+                      onChange={(e) => setCurriculumFile(e.target.files[0])}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    {curriculumFile ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <FileText className="w-8 h-8 text-primary" />
+                        <span className="font-label-md text-sm text-on-surface text-center px-4 truncate w-full max-w-[200px]">
+                          {curriculumFile.name}
+                        </span>
+                        <span className="text-xs text-primary font-medium mt-1">Change file</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-secondary">
+                          <Upload className="w-5 h-5" />
+                        </div>
+                        <span className="font-label-md text-sm text-on-surface">Click or drag file to upload</span>
+                        <span className="font-body-sm text-xs text-secondary">Supports PDF, JPG, PNG</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </>
             )}
