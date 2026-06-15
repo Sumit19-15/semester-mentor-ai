@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Semester Mentor - Academic Planner</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<!-- Tailwind Config injected from Style Guidance -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "tertiary-fixed-dim": "#8dcdff",
+                            "primary-fixed-dim": "#ffb94c",
+                            "on-tertiary-fixed-variant": "#004b70",
+                            "surface-bright": "#fbf9f8",
+                            "inverse-on-surface": "#f2f0f0",
+                            "on-surface-variant": "#514534",
+                            "surface-container-lowest": "#ffffff",
+                            "surface-container-highest": "#e4e2e2",
+                            "on-primary-container": "#5b3b00",
+                            "surface-tint": "#815500",
+                            "tertiary-fixed": "#cae6ff",
+                            "secondary-container": "#e2dfde",
+                            "tertiary": "#006493",
+                            "on-error": "#ffffff",
+                            "error-container": "#ffdad6",
+                            "on-secondary-fixed": "#1c1b1b",
+                            "surface-container-low": "#f5f3f3",
+                            "primary-container": "#e8a020",
+                            "on-primary-fixed": "#291800",
+                            "surface-container-high": "#e9e8e7",
+                            "primary": "#815500",
+                            "error": "#ba1a1a",
+                            "on-primary": "#ffffff",
+                            "on-tertiary-fixed": "#001e30",
+                            "on-secondary-container": "#636262",
+                            "surface": "#fbf9f8",
+                            "on-secondary": "#ffffff",
+                            "on-surface": "#1b1c1c",
+                            "tertiary-container": "#4ab7fc",
+                            "on-error-container": "#93000a",
+                            "primary-fixed": "#ffddb2",
+                            "outline": "#847562",
+                            "background": "#fbf9f8",
+                            "on-tertiary": "#ffffff",
+                            "on-background": "#1b1c1c",
+                            "inverse-primary": "#ffb94c",
+                            "outline-variant": "#d6c4ae",
+                            "secondary": "#5f5e5e",
+                            "surface-variant": "#e4e2e2",
+                            "secondary-fixed": "#e5e2e1",
+                            "secondary-fixed-dim": "#c8c6c5",
+                            "surface-dim": "#dbdad9",
+                            "on-tertiary-container": "#004668",
+                            "on-secondary-fixed-variant": "#474746",
+                            "inverse-surface": "#303031",
+                            "surface-container": "#efeded",
+                            "on-primary-fixed-variant": "#624000"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "stack_sm": "8px",
+                            "gutter": "24px",
+                            "stack_lg": "32px",
+                            "sidebar_width": "240px",
+                            "stack_md": "16px",
+                            "container_max_width": "1200px",
+                            "navbar_height": "56px"
+                    },
+                    "fontFamily": {
+                            "headline-md": [
+                                    "Inter"
+                            ],
+                            "body-md": [
+                                    "Inter"
+                            ],
+                            "display-lg": [
+                                    "Inter"
+                            ],
+                            "label-md": [
+                                    "Inter"
+                            ],
+                            "headline-sm": [
+                                    "Inter"
+                            ],
+                            "label-sm": [
+                                    "Inter"
+                            ],
+                            "body-lg": [
+                                    "Inter"
+                            ]
+                    },
+                    "fontSize": {
+                            "headline-md": [
+                                    "24px",
+                                    {
+                                            "lineHeight": "32px",
+                                            "letterSpacing": "-0.01em",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "body-md": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "display-lg": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "40px",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "700"
+                                    }
+                            ],
+                            "label-md": [
+                                    "12px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "letterSpacing": "0.01em",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "headline-sm": [
+                                    "18px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "label-sm": [
+                                    "11px",
+                                    {
+                                            "lineHeight": "14px",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "400"
+                                    }
+                            ]
+                    }
+            },
+                },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Marketing Top Navbar (Not the application shell TopNavBar, but a public variant) -->
+<nav class="w-full h-navbar_height fixed top-0 left-0 z-50 bg-surface/90 backdrop-blur-sm border-b border-outline-variant flex justify-between items-center px-gutter transition-all duration-300">
+<div class="flex items-center gap-stack_sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Semester Mentor</span>
+</div>
+<div class="flex items-center gap-stack_md">
+<a class="font-label-md text-label-md text-secondary hover:text-on-surface transition-colors duration-150" href="#">Login</a>
+<a class="bg-primary-container text-on-primary-container font-label-md text-label-md px-stack_md py-[8px] rounded-lg hover:bg-primary hover:text-on-primary transition-all duration-150 active:scale-95 shadow-sm" href="#">Get Started</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-grow pt-[120px] pb-stack_lg px-gutter max-w-container_max_width mx-auto w-full flex flex-col items-center justify-center">
+<!-- Hero Section -->
+<section class="text-center w-full max-w-3xl flex flex-col items-center gap-stack_lg mb-[80px]">
+<h1 class="font-display-lg text-display-lg text-on-surface tracking-tight leading-tight">
+                Organize your semester.<br/>
+<span class="text-primary">Study smarter.</span>
+</h1>
+<p class="font-body-lg text-body-lg text-secondary max-w-2xl mx-auto">
+                A rigorous, distraction-free academic workspace designed for serious students. Track subjects, manage projects, and maintain control over your entire semester.
+            </p>
+<div class="flex items-center justify-center gap-stack_md mt-stack_sm">
+<a class="bg-primary-container text-on-primary-container font-label-md text-label-md px-stack_lg py-stack_sm rounded-lg hover:bg-primary hover:text-on-primary transition-all duration-150 active:scale-95 shadow-sm border border-transparent" href="#">
+                    Get Started Free
+                </a>
+<a class="bg-transparent text-secondary font-label-md text-label-md px-stack_lg py-stack_sm rounded-lg hover:bg-surface-variant hover:text-on-surface transition-all duration-150 active:scale-95" href="#">
+                    Login
+                </a>
+</div>
+</section>
+<!-- Product Interface Preview (Bento Style Suggestion) -->
+<div class="w-full relative mb-[120px] rounded-xl overflow-hidden border border-outline-variant bg-surface-container-low shadow-sm aspect-[16/9] group">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface-variant/20 z-10 pointer-events-none"></div>
+<!-- Mock UI Elements to suggest the app's look -->
+<div class="w-full h-full p-stack_md flex gap-stack_md relative z-0">
+<!-- Mock Sidebar -->
+<div class="w-[200px] h-full bg-surface rounded-lg border border-outline-variant/50 hidden md:flex flex-col gap-stack_sm p-stack_sm opacity-80 transition-opacity group-hover:opacity-100">
+<div class="h-8 bg-surface-variant rounded mb-4"></div>
+<div class="h-6 bg-surface-variant/50 rounded w-3/4"></div>
+<div class="h-6 bg-surface-variant/50 rounded w-full"></div>
+<div class="h-6 bg-primary-container/30 rounded w-5/6"></div>
+<div class="h-6 bg-surface-variant/50 rounded w-2/3"></div>
+</div>
+<!-- Mock Main Content -->
+<div class="flex-1 h-full flex flex-col gap-stack_md opacity-80 transition-opacity group-hover:opacity-100">
+<div class="h-12 bg-surface rounded-lg border border-outline-variant/50 w-full"></div>
+<div class="flex-1 flex gap-stack_md">
+<div class="flex-1 bg-surface rounded-lg border border-outline-variant/50 p-stack_sm flex flex-col gap-stack_sm">
+<div class="h-4 bg-surface-variant/50 rounded w-1/3 mb-2"></div>
+<div class="h-16 bg-surface-variant/20 rounded w-full border border-outline-variant/30"></div>
+<div class="h-16 bg-surface-variant/20 rounded w-full border border-outline-variant/30"></div>
+</div>
+<div class="w-[30%] bg-surface rounded-lg border border-outline-variant/50 p-stack_sm hidden lg:block">
+<div class="h-4 bg-surface-variant/50 rounded w-1/2 mb-4"></div>
+<div class="h-32 bg-primary-container/10 rounded w-full border border-primary-container/30"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive glow effect -->
+<div class="absolute -inset-1 bg-gradient-to-r from-primary-container/20 to-tertiary-container/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+</div>
+<!-- Features Grid -->
+<section class="w-full max-w-5xl">
+<h2 class="font-headline-md text-headline-md text-center mb-stack_lg text-on-surface">Systematic Academic Management</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-stack_lg">
+<!-- Feature 1 -->
+<div class="bg-surface-container-low rounded-lg p-stack_lg border border-outline-variant hover:border-primary/30 hover:bg-surface-container transition-all duration-300 flex flex-col items-center text-center group">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center mb-stack_md group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-primary">dashboard</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-stack_sm">Central Dashboard</h3>
+<p class="font-body-md text-body-md text-secondary">
+                        A unified view of your entire semester. Instantly see upcoming deadlines, current progress, and priority tasks.
+                    </p>
+</div>
+<!-- Feature 2 -->
+<div class="bg-surface-container-low rounded-lg p-stack_lg border border-outline-variant hover:border-primary/30 hover:bg-surface-container transition-all duration-300 flex flex-col items-center text-center group">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/20 flex items-center justify-center mb-stack_md group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-tertiary">menu_book</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-stack_sm">Subject Tracking</h3>
+<p class="font-body-md text-body-md text-secondary">
+                        Isolate and manage individual courses. Keep syllabus details, reading lists, and specific notes securely organized.
+                    </p>
+</div>
+<!-- Feature 3 -->
+<div class="bg-surface-container-low rounded-lg p-stack_lg border border-outline-variant hover:border-primary/30 hover:bg-surface-container transition-all duration-300 flex flex-col items-center text-center group">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center mb-stack_md group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-primary">assignment</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-stack_sm">Project Planning</h3>
+<p class="font-body-md text-body-md text-secondary">
+                        Break down major assignments into actionable steps. Track progress with rigorous status indicators and deadlines.
+                    </p>
+</div>
+</div>
+</section>
+</main>
+<!-- Simple Footer -->
+<footer class="w-full border-t border-outline-variant py-stack_lg px-gutter text-center bg-surface-container-lowest mt-auto">
+<p class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">
+            © 2024 Semester Mentor. Minimalist Academic Productivity.
+        </p>
+</footer>
+<script>
+        // Subtle navbar blur effect on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 10) {
+                nav.classList.add('shadow-sm');
+                nav.style.backgroundColor = 'rgba(251, 249, 248, 0.95)'; // surface with opacity
+            } else {
+                nav.classList.remove('shadow-sm');
+                nav.style.backgroundColor = 'rgba(251, 249, 248, 0.9)';
+            }
+        });
+    </script>
+</body></html>
