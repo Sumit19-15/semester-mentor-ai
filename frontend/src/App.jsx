@@ -5,6 +5,7 @@ import TopNavBar from './components/TopNavBar';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import OnboardingPage from './pages/OnboardingPage';
+import DashboardPage from './pages/DashboardPage';
 
 function App() {
   const theme = useThemeStore((state) => state.theme);
@@ -26,7 +27,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<OnboardingPage />} />
-        <Route path="/dashboard" element={<div>Dashboard (WIP)</div>} />
+        <Route path="/dashboard" element={<DashboardPage />} />
       </Routes>
     </Router>
   );
