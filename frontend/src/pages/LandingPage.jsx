@@ -11,8 +11,8 @@ export default function LandingPage() {
             Organize your semester.<br/>
             <span className="text-primary">Study smarter.</span>
           </h1>
-          <p className="font-body-lg text-body-lg text-secondary max-w-2xl mx-auto">
-            A rigorous, distraction-free academic workspace designed for serious students. Track subjects, manage projects, and maintain control over your entire semester.
+          <p className="font-body-lg text-body-lg text-secondary mb-stack_lg max-w-2xl mx-auto leading-relaxed">
+            A rigorous, distraction-free academic workspace designed for serious students. Track subjects, manage modules, and maintain control over your entire semester.
           </p>
           <div className="flex items-center justify-center gap-stack_md mt-stack_sm">
             <Link
@@ -98,7 +98,7 @@ export default function LandingPage() {
               <div className="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center mb-stack_md group-hover:scale-110 transition-transform duration-300">
                 <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>assignment</span>
               </div>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-stack_sm">Project Planning</h3>
+              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-stack_sm">Module Planning</h3>
               <p className="font-body-md text-body-md text-secondary">
                 Break down major assignments into actionable steps. Track progress with rigorous status indicators and deadlines.
               </p>

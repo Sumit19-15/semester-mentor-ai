@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 export default function DashboardLayout({ children }) {
   const location = useLocation();
   const isChatPage = location.pathname.startsWith('/chats') || 
-                     location.pathname.startsWith('/project-chat') || 
+                     location.pathname.startsWith('/module-chat') || 
                      location.pathname.startsWith('/subjects');
 
   return (

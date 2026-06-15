@@ -42,7 +42,7 @@ export default function MentorChatPage() {
             </div>
             <h2 className="font-display-lg text-[32px] leading-[40px] font-bold text-on-surface mb-2">Semester Mentor</h2>
             <p className="font-body-lg text-[16px] text-secondary max-w-[500px]">
-              Ask anything about your semester, subjects, projects, or study plans.
+              Ask anything about your semester, subjects, modules, or study plans.
             </p>
           </div>
           

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Folder, Plus, Share2, MoreVertical, BrainCircuit, Copy, ThumbsUp, Paperclip, Library, ArrowUp, ChevronDown, ChevronRight } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 
-export default function AiProjectChatPage() {
+export default function AiModuleChatPage() {
   const [expandedModule, setExpandedModule] = useState('Data Structures Final');
 
   const modules = [
@@ -38,12 +38,12 @@ export default function AiProjectChatPage() {
   return (
     <DashboardLayout>
       <div className="flex w-full h-full overflow-hidden">
-        {/* Inner Sidebar for Project Navigation */}
+        {/* Inner Sidebar for Module Navigation */}
         <aside className="w-[280px] h-full bg-surface border-r border-outline-variant flex flex-col shrink-0 relative z-20">
           <div className="p-4 border-b border-outline-variant/50 shrink-0 flex flex-col gap-3">
             <div className="flex items-center gap-2 text-secondary">
               <Folder className="w-[18px] h-[18px]" />
-              <span className="font-label-sm text-[11px] font-semibold uppercase tracking-wider">Project</span>
+              <span className="font-label-sm text-[11px] font-semibold uppercase tracking-wider">Module</span>
             </div>
             <h3 className="font-headline-sm text-[18px] font-bold text-on-surface leading-tight">
               {activeModule.name}
@@ -120,7 +120,7 @@ export default function AiProjectChatPage() {
               {/* User Message */}
               <div className="flex flex-col gap-1 self-end max-w-[85%] group">
                 <div className="bg-surface-container text-on-surface p-4 rounded-xl rounded-tr-sm border border-outline-variant/20 shadow-sm">
-                  <p className="font-body-md text-[14px] leading-relaxed">I need to implement a graph search algorithm for the final project. We are simulating traffic routing across a city grid. What are the core differences I should consider between Dijkstra's and A*?</p>
+                  <p className="font-body-md text-[14px] leading-relaxed">I need to implement a graph search algorithm for the final module. We are simulating traffic routing across a city grid. What are the core differences I should consider between Dijkstra's and A*?</p>
                 </div>
               </div>
 

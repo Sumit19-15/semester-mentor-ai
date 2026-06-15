@@ -106,20 +106,20 @@ export default function DashboardPage() {
             { title: "Algorithm Analysis Paper", time: "Last active 4 days ago" },
             { title: "Usability Study Results", time: "Last active 1 week ago" },
             { title: "Semester Reading List", time: "Last active 2 weeks ago" }
-          ].map((project, idx) => (
-            <div 
+          ].map((moduleItem, idx) => (
+            <button 
               key={idx} 
-              onClick={() => navigate('/project-chat')}
-              className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_sm flex items-start gap-3 hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer group"
+              onClick={() => navigate('/module-chat')}
+              className="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack_md text-left hover:shadow-sm hover:border-primary/50 transition-all duration-200 group flex flex-col h-full"
             >
               <div className="w-10 h-10 rounded bg-secondary-container/30 flex items-center justify-center text-primary group-hover:bg-primary-container/20 transition-colors shrink-0">
                 <FileText className="w-5 h-5" />
               </div>
-              <div className="flex flex-col justify-center min-h-[40px] overflow-hidden">
-                <h5 className="font-label-md text-label-md text-on-surface truncate w-full">{project.title}</h5>
-                <p className="font-label-sm text-label-sm text-secondary mt-0.5">{project.time}</p>
+              <div className="mb-4">
+                <h5 className="font-label-md text-label-md text-on-surface truncate w-full">{moduleItem.title}</h5>
+                <p className="font-label-sm text-label-sm text-secondary mt-0.5">{moduleItem.time}</p>
               </div>
-            </div>
+            </button>
           ))}
 
         </div>
