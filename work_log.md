@@ -58,3 +58,15 @@
 - Converted Tailwind classes to standard app variables (e.g., mapped custom `brand-500` to `primary` and `brand-50` to `primary-container/20`).
 - Created `SubjectWorkspacePage.jsx` wrapped inside `DashboardLayout` for a seamless sidebar integration.
 - Wired the new page into `App.jsx` under the `/subjects` route.
+
+## Step 7: Subject Workspace - Notes
+- Fetched and analyzed the "Subject Workspace - Notes" HTML design from Stitch.
+- Extracted the main Overview area into a new component `SubjectOverviewTab.jsx`.
+- Converted the "Notes" tab layout into `SubjectNotesTab.jsx`, utilizing `lucide-react` icons and our existing Tailwind theme variables.
+- Refactored `SubjectWorkspacePage.jsx` to introduce state-driven tab switching (`activeTab`), cleanly decoupling the page shell from its sub-content. Clicking on the "Notes" tab now renders the new note UI.
+
+## Step 8 & 9: Subject Workspace - Resources & PYQs
+- Fetched HTML designs for both the Resources and PYQs screens simultaneously.
+- Created `SubjectResourcesTab.jsx` to house the resources table (with standard document type icons: PDF, Link, Word).
+- Created `SubjectPyqsTab.jsx` to handle past year papers, including a dedicated search/filter bar and list interface.
+- Wired both new components into `SubjectWorkspacePage.jsx`. All four tabs (Topics, Resources, Notes, PYQs) are now fully functional and match the Stitch designs seamlessly.
