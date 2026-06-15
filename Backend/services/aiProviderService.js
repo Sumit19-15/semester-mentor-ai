@@ -131,3 +131,27 @@ export const generateStudyPlanWithAi = async ({
     result: parseJsonResponse(content),
   };
 };
+
+export const generateChatResponseWithAi = async ({ messages }) => {
+  const config = getProviderConfig();
+
+  const client = new OpenAI({
+    apiKey: config.apiKey,
+    baseURL: config.baseURL,
+  });
+
+  const request = {
+    model: config.model,
+    messages: messages,
+    temperature: 0.7,
+  };
+
+  const response = await createChatCompletionWithRetry(client, request);
+
+  return {
+    provider: config.provider,
+    model: config.model,
+    content: response.choices?.[0]?.message?.content,
+  };
+};
+

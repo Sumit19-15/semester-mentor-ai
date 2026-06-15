@@ -11,7 +11,7 @@ import topicRoutes from "./routes/topicRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
 import pyqRoutes from "./routes/pyqRoutes.js";
 import studyPlanRoutes from "./routes/studyPlanRoutes.js";
-
+import chatRoutes from "./routes/chatRoutes.js";
 connectDB();
 const __dirname = path.resolve();
 
@@ -26,6 +26,7 @@ app.use("/api/topics", topicRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/pyqs", pyqRoutes);
 app.use("/api/study-plans", studyPlanRoutes);
+app.use("/api/chats", chatRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
