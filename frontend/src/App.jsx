@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import OnboardingPage from './pages/OnboardingPage';
 import DashboardPage from './pages/DashboardPage';
 import MentorChatPage from './pages/MentorChatPage';
+import SubjectWorkspacePage from './pages/SubjectWorkspacePage';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
         
         {/* Dashboard routes nested inside layout manually for now */}
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/subjects" element={<SubjectWorkspacePage />} />
         <Route path="/chats" element={
           <DashboardLayout>
             <MentorChatPage />
