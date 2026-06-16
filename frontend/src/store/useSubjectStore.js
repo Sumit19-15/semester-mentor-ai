@@ -164,6 +164,20 @@ export const useSubjectStore = create((set, get) => ({
     }
   },
 
+  deleteAllTopicsForSubject: async (subjectId) => {
+    try {
+      await api.delete(`/topics/subject/${subjectId}`);
+      set((state) => ({
+        topics: [],
+        subjects: state.subjects.map(sub => 
+          sub._id === subjectId ? { ...sub, topics: [] } : sub
+        )
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
   completeTopic: async (topicId, subjectId) => {
     try {
       const response = await api.put(`/topics/${topicId}/complete`);

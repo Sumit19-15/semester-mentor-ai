@@ -3,7 +3,7 @@ import { CheckCircle2, Play, Lock, FileText, ExternalLink, List, FileQuestion, C
 import { useSubjectStore } from '../store/useSubjectStore';
 import AddTopicModal from './AddTopicModal';
 
-export default function SubjectOverviewTab() {
+export default function SubjectOverviewTab({ setActiveTab }) {
   const { topics, notes, resources, pyqs, activeSubject, deleteTopic, completeTopic } = useSubjectStore();
   const [isAddTopicModalOpen, setIsAddTopicModalOpen] = useState(false);
 
@@ -96,7 +96,6 @@ export default function SubjectOverviewTab() {
                       type="checkbox" 
                       checked={topic.completed}
                       onChange={(e) => handleComplete(e, topic._id)}
-                      disabled={topic.completed}
                       className="w-4 h-4 rounded text-primary focus:ring-primary cursor-pointer border-outline-variant"
                     />
                     Mark Complete
@@ -113,11 +112,17 @@ export default function SubjectOverviewTab() {
       {/* Right Column (Widgets) */}
       <aside className="w-full xl:w-80 flex-shrink-0 flex flex-col gap-6" data-purpose="side-widgets">
         {/* Quick Resources Widget */}
-        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 shadow-sm flex flex-col">
-          <h3 className="font-label-sm text-[12px] font-bold text-secondary uppercase tracking-wider mb-4 flex items-center gap-2 shrink-0">
-            <BookOpen className="w-4 h-4" />
-            Quick Resources
-          </h3>
+        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 shadow-sm flex flex-col hover:border-primary/30 transition-colors">
+          <button 
+            onClick={() => setActiveTab('Resources')}
+            className="w-full text-left font-label-sm text-[12px] font-bold text-secondary uppercase tracking-wider mb-4 flex items-center justify-between gap-2 shrink-0 group"
+          >
+            <div className="flex items-center gap-2 group-hover:text-primary transition-colors">
+              <BookOpen className="w-4 h-4" />
+              Quick Resources
+            </div>
+            <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all" />
+          </button>
           <div className="space-y-4 overflow-y-auto custom-scrollbar max-h-[300px] pr-2">
             {sortedResources.length > 0 ? sortedResources.map((resource, index) => (
               <a key={resource._id || index} className="flex items-start gap-3 group cursor-pointer" href={resource.link || "#"} target="_blank" rel="noreferrer">
@@ -136,13 +141,17 @@ export default function SubjectOverviewTab() {
         </div>
 
         {/* Recent Notes Widget */}
-        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 shadow-sm flex flex-col">
-          <div className="flex justify-between items-center mb-4 shrink-0">
-            <h3 className="font-label-sm text-[12px] font-bold text-secondary uppercase tracking-wider flex items-center gap-2">
+        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 shadow-sm flex flex-col hover:border-primary/30 transition-colors">
+          <button 
+            onClick={() => setActiveTab('Notes')}
+            className="w-full text-left font-label-sm text-[12px] font-bold text-secondary uppercase tracking-wider mb-4 flex items-center justify-between gap-2 shrink-0 group"
+          >
+            <div className="flex items-center gap-2 group-hover:text-primary transition-colors">
               <List className="w-4 h-4" />
               Recent Notes
-            </h3>
-          </div>
+            </div>
+            <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all" />
+          </button>
           <div className="space-y-3 overflow-y-auto custom-scrollbar max-h-[300px] pr-2">
             {sortedNotes.length > 0 ? sortedNotes.map((note, index) => (
               <a key={note._id || index} className="block bg-surface-container border border-outline-variant rounded-lg p-3 hover:bg-surface-container-high transition-colors cursor-pointer" href={note.fileUrl || "#"} target="_blank" rel="noreferrer">
@@ -156,11 +165,17 @@ export default function SubjectOverviewTab() {
         </div>
 
         {/* Latest PYQs Widget */}
-        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 shadow-sm flex flex-col">
-          <h3 className="font-label-sm text-[12px] font-bold text-secondary uppercase tracking-wider mb-3 flex items-center gap-2 shrink-0">
-            <FileQuestion className="w-4 h-4" />
-            Latest PYQs
-          </h3>
+        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-5 shadow-sm flex flex-col hover:border-primary/30 transition-colors">
+          <button 
+            onClick={() => setActiveTab('PYQs')}
+            className="w-full text-left font-label-sm text-[12px] font-bold text-secondary uppercase tracking-wider mb-3 flex items-center justify-between gap-2 shrink-0 group"
+          >
+            <div className="flex items-center gap-2 group-hover:text-primary transition-colors">
+              <FileQuestion className="w-4 h-4" />
+              Latest PYQs
+            </div>
+            <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all" />
+          </button>
           <div className="flex flex-col overflow-y-auto custom-scrollbar max-h-[300px] pr-2">
             {sortedPyqs.length > 0 ? sortedPyqs.map((pyq, index) => (
               <a key={pyq._id || index} className="flex justify-between items-center py-3 border-b border-outline-variant group cursor-pointer" href={pyq.fileUrl || "#"} target="_blank" rel="noreferrer">

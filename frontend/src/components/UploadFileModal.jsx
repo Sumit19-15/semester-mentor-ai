@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Loader2, Upload } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../services/api';
 import { useSubjectStore } from '../store/useSubjectStore';
 
@@ -51,6 +52,8 @@ export default function UploadFileModal({ isOpen, onClose, subjectId, uploadType
         }
       }
       
+      toast.success(`${uploadType.charAt(0).toUpperCase() + uploadType.slice(1)} uploaded successfully!`);
+
       // Reset form
       setTitle('');
       setDescription('');
@@ -60,7 +63,7 @@ export default function UploadFileModal({ isOpen, onClose, subjectId, uploadType
       onClose();
     } catch (error) {
       console.error(`Failed to upload ${uploadType}`, error);
-      alert(error.response?.data?.message || `Failed to upload ${uploadType}`);
+      toast.error(error.response?.data?.message || `Failed to upload ${uploadType}`);
     } finally {
       setIsSubmitting(false);
     }

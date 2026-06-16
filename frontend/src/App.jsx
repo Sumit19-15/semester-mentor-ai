@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { useThemeStore } from './store/themeStore';
 import TopNavBar from './components/TopNavBar';
 import LandingPage from './pages/LandingPage';
@@ -9,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import MentorChatPage from './pages/MentorChatPage';
 import SubjectWorkspacePage from './pages/SubjectWorkspacePage';
 import AiModuleChatPage from './pages/AiModuleChatPage';
+import SettingsPage from './pages/SettingsPage';
 import DashboardLayout from './layouts/DashboardLayout';
 
 function App() {
@@ -26,6 +28,7 @@ function App() {
 
   return (
     <Router>
+      <Toaster position="top-right" />
       <TopNavBar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -36,6 +39,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/subjects" element={<SubjectWorkspacePage />} />
         <Route path="/module-chat" element={<AiModuleChatPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/chats" element={
           <DashboardLayout>
             <MentorChatPage />

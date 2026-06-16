@@ -75,7 +75,9 @@ export default function SideNavBar() {
         <button 
           onClick={async () => {
             const { useAuthStore } = await import('../store/authStore');
-            useAuthStore.getState().logout();
+            await useAuthStore.getState().logout();
+            // Force a hard reload to clear any remaining state and go to login
+            window.location.href = '/login';
           }}
           className="w-full flex items-center gap-4 px-3 py-2 rounded-lg text-secondary hover:bg-error-container hover:text-on-error-container transition-colors duration-150 cursor-pointer text-left"
         >

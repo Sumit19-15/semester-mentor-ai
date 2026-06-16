@@ -95,14 +95,10 @@ export default function DashboardPage() {
       <section>
         <div className="flex justify-between items-center mb-stack_md">
           <h3 className="font-headline-sm text-headline-sm text-on-surface">Modules</h3>
-          <button className="font-label-md text-label-md text-on-background bg-surface-container-lowest border border-surface-variant rounded-lg px-3 py-1.5 hover:bg-surface-container-low transition-colors flex items-center gap-1 cursor-pointer">
-            <Plus className="w-4 h-4" />
-            New Module
-          </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-stack_sm">
           
-          {allTopics.length > 0 ? allTopics.slice(0, 4).map((topicItem, idx) => (
+          {allTopics.length > 0 ? allTopics.slice(0, 8).map((topicItem, idx) => (
             <button 
               key={topicItem._id || idx} 
               onClick={() => navigate('/module-chat')}
@@ -111,7 +107,7 @@ export default function DashboardPage() {
               <div className="w-10 h-10 rounded bg-secondary-container/30 flex items-center justify-center text-primary group-hover:bg-primary-container/20 transition-colors shrink-0">
                 <FileText className="w-5 h-5" />
               </div>
-              <div className="mb-4">
+              <div className="mb-4 mt-2">
                 <h5 className="font-label-md text-label-md text-on-surface truncate w-full">{topicItem.title}</h5>
                 <p className="font-label-sm text-label-sm text-secondary mt-0.5">{topicItem.subject?.name || 'Topic'}</p>
               </div>

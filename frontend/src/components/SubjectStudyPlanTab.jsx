@@ -1,34 +1,82 @@
-import { Calendar, Clock, CheckCircle2, Target, BookOpen, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, Clock, CheckCircle2, Target, BookOpen, AlertCircle, Sparkles, ChevronRight } from 'lucide-react';
 import { useSubjectStore } from '../store/useSubjectStore';
+import GeneratePlanModal from './GeneratePlanModal';
 
 export default function SubjectStudyPlanTab() {
-  const { activeStudyPlan } = useSubjectStore();
+  const { activeStudyPlan, studyPlans, setActiveStudyPlan, activeSubject } = useSubjectStore();
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
 
-  if (!activeStudyPlan) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4 text-secondary">
-          <Calendar className="w-8 h-8" />
-        </div>
-        <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">No Study Plan Selected</h3>
-        <p className="font-body-md text-secondary max-w-md">
-          Generate a new study plan from the left sidebar or select an existing one to view your schedule.
-        </p>
+  const renderEmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-16 text-center bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm mt-6">
+      <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4 text-secondary">
+        <Calendar className="w-8 h-8" />
       </div>
-    );
-  }
-
-  const { planData, startDate, endDate } = activeStudyPlan;
-  
-  // Try to use the AI's plan if available, else fallback
-  const plan = planData?.plan || planData;
-  const summary = plan?.summary || "Study Plan";
-  const dailyPlans = plan?.daily || [];
-  const weeklyPlans = plan?.weekly || [];
+      <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">No Study Plan Selected</h3>
+      <p className="font-body-md text-secondary max-w-md">
+        Select an existing plan from above or generate a new one to view your schedule.
+      </p>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-8 pb-8">
-      {/* Header Info */}
+      {/* Plans List & Generate Button Header */}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-headline-sm text-[18px] font-bold text-on-surface flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-primary" />
+            Your Study Plans
+          </h3>
+          <button 
+            onClick={() => setIsGenerateModalOpen(true)}
+            className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-[14px] px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm font-semibold"
+          >
+            <Sparkles className="w-4 h-4" />
+            Generate New Plan
+          </button>
+        </div>
+        
+        {studyPlans && studyPlans.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {studyPlans.map(plan => (
+              <button 
+                key={plan._id}
+                onClick={() => setActiveStudyPlan(plan)}
+                className={`flex items-center justify-between p-4 rounded-xl border transition-all text-left group ${activeStudyPlan?._id === plan._id ? 'border-primary bg-primary-container/10 ring-1 ring-primary/20' : 'border-outline-variant hover:border-primary/50 bg-surface'}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${activeStudyPlan?._id === plan._id ? 'bg-primary text-on-primary' : 'bg-surface-container text-secondary group-hover:text-primary transition-colors'}`}>
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className={`font-label-md text-[14px] font-bold ${activeStudyPlan?._id === plan._id ? 'text-primary' : 'text-on-surface'}`}>
+                      {new Date(plan.startDate).toLocaleDateString()}
+                    </h4>
+                    <p className="font-label-sm text-[11px] text-secondary mt-0.5">
+                      {plan.dailyHours} hours/day
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className={`w-5 h-5 transition-colors ${activeStudyPlan?._id === plan._id ? 'text-primary' : 'text-outline group-hover:text-primary'}`} />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-secondary font-body-sm text-[14px]">No study plans generated yet. Click the button above to start planning!</p>
+        )}
+      </div>
+
+      {!activeStudyPlan ? renderEmptyState() : (() => {
+        const { planData, startDate, endDate } = activeStudyPlan;
+        const plan = planData?.plan || planData;
+        const summary = plan?.summary || "Study Plan";
+        const dailyPlans = plan?.daily || [];
+        const weeklyPlans = plan?.weekly || [];
+
+        return (
+          <div className="flex flex-col gap-8">
+            {/* Header Info */}
       <div className="bg-gradient-to-br from-primary-container/40 to-surface-container-lowest rounded-2xl border border-primary/20 p-6 sm:p-8 shadow-sm">
         <div className="flex items-start justify-between gap-4 flex-col sm:flex-row mb-4">
           <div>
@@ -151,6 +199,18 @@ export default function SubjectStudyPlanTab() {
           </div>
         </div>
       </div>
+    </div>
+  );
+})()}
+
+      <GeneratePlanModal
+        isOpen={isGenerateModalOpen}
+        onClose={(newPlan) => {
+          setIsGenerateModalOpen(false);
+          if (newPlan) setActiveStudyPlan(newPlan);
+        }}
+        subjectId={activeSubject?._id}
+      />
     </div>
   );
 }
