@@ -26,6 +26,25 @@ export const createTopic = async (req, res) => {
   }
 };
 
+// @desc    Get topics for logged-in user (optional: filter by subject)
+// @route   GET /api/topics
+// @access  Private
+export const getTopics = async (req, res) => {
+  try {
+    const query = { user: req.user._id };
+
+    if (req.query.subject) {
+      query.subject = req.query.subject;
+    }
+
+    const topics = await Topic.find(query).populate("subject", "name");
+
+    res.status(200).json(topics);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
 // @desc    Update topic progress (Mark as completed)
 // @route   PUT /api/topics/:id/complete
 // @access  Private
