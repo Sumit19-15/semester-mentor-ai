@@ -114,6 +114,7 @@ export const parseTopicsForSubject = async (req, res) => {
       user: req.user._id,
       subject: subjectId,
       title: topic.title,
+      description: topic.description,
       completed: false, // Default tracking state
     }));
 

@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 
+// three models selected for work
 const providerDefaults = {
   openai: {
     apiKey: process.env.OPENAI_API_KEY,
@@ -21,9 +22,10 @@ const providerDefaults = {
 };
 
 const getProviderConfig = () => {
-  const provider = (process.env.AI_PROVIDER || "openai").toLowerCase();
-  const defaults = providerDefaults[provider] || providerDefaults.custom;
+  const provider = (process.env.AI_PROVIDER || "openai").toLowerCase(); // take out the model 
+  const defaults = providerDefaults[provider] || providerDefaults.custom; // make it default model 
 
+  // if any error take out from the .env
   const apiKey = process.env.AI_API_KEY || defaults.apiKey;
   const baseURL = process.env.AI_BASE_URL || defaults.baseURL;
   const model = process.env.AI_MODEL || defaults.model;

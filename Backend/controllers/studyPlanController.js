@@ -164,8 +164,7 @@ export const generateStudyPlan = async (req, res) => {
 // @access  Private
 export const generateStudyPlanFromSyllabus = async (req, res) => {
   try {
-    const { subjectName, courseCode, startDate, endDate, dailyStudyHours, goal } =
-      req.body;
+    const { subjectName, courseCode, startDate, endDate, dailyStudyHours, goal } = req.body;
 
     if (!req.file) {
       return res.status(400).json({
@@ -179,6 +178,7 @@ export const generateStudyPlanFromSyllabus = async (req, res) => {
       });
     }
 
+    // calling fun and getting all topics from the uplaoded syallbus
     const topicsArray = await parseTopicsFromSyllabusFile({
       filePath: req.file.path,
       mimeType: req.file.mimetype,

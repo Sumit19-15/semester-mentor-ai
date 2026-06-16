@@ -46,6 +46,7 @@ export const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         message: "Student registered successfully!",
+        token: generateToken(user._id)
       });
     } else {
       res.status(400).json({ message: "Invalid user data received" });
@@ -56,6 +57,7 @@ export const registerUser = async (req, res) => {
   }
 };
 
+// login user 
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
