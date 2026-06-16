@@ -141,3 +141,22 @@ export const updateUserProfile = async (req, res) => {
       .json({ message: "Error in updateUserProfile: " + error.message });
   }
 };
+
+export const logoutUser = async (req, res) => {
+  try {
+    let token;
+    if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+    
+    if (token) {
+      const TokenBlacklist = (await import("../models/TokenBlacklistModel.js")).default;
+      await TokenBlacklist.create({ token });
+    }
+    
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error in logoutUser:", error.message);
+    res.status(500).json({ message: "Server error during logout" });
+  }
+};

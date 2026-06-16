@@ -75,6 +75,8 @@ const normalizeSubjectIds = (subjectIds) => {
   return [subjectIds];
 };
 
+import StudyPlan from "../models/StudyPlanModel.js";
+
 // @desc    Generate an AI study plan from stored syllabus topics
 // @route   POST /api/study-plans/generate
 // @access  Private
@@ -93,7 +95,7 @@ export const generateStudyPlan = async (req, res) => {
     const planStartDate = startDate || timeframe?.startDate;
     const planEndDate = endDate || timeframe?.endDate;
     const availableHours =
-      dailyStudyHours || req.user.dailyFreeHours || timeframe?.dailyStudyHours;
+      dailyStudyHours || req.user.dailyFreeHours || timeframe?.dailyStudyHours || 4;
 
     if (!planStartDate || !planEndDate) {
       return res.status(400).json({
@@ -135,6 +137,16 @@ export const generateStudyPlan = async (req, res) => {
       userPrompt: buildUserPrompt({ context, preferences }),
     });
 
+    // Save to Database
+    const savedPlan = await StudyPlan.create({
+      user: req.user._id,
+      subject: normalizeSubjectIds(subjectIds)[0], // Assuming generating for one subject at a time
+      dailyHours: availableHours,
+      startDate: planStartDate,
+      endDate: planEndDate,
+      planData: aiResponse.result,
+    });
+
     res.status(200).json({
       message: "Study plan generated successfully.",
       provider: aiResponse.provider,
@@ -150,10 +162,31 @@ export const generateStudyPlan = async (req, res) => {
         resources: context.resources.length,
       },
       plan: aiResponse.result,
+      _id: savedPlan._id,
+      createdAt: savedPlan.createdAt
     });
   } catch (error) {
     res.status(500).json({
       message: "Study plan generation failed",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Get all study plans for a specific subject
+// @route   GET /api/study-plans/:subjectId
+// @access  Private
+export const getStudyPlans = async (req, res) => {
+  try {
+    const plans = await StudyPlan.find({ 
+      user: req.user._id, 
+      subject: req.params.subjectId 
+    }).sort({ createdAt: -1 });
+    
+    res.status(200).json(plans);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch study plans",
       error: error.message,
     });
   }

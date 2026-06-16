@@ -72,3 +72,27 @@ export const completeTopic = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+// @desc    Delete a topic
+// @route   DELETE /api/topics/:id
+// @access  Private
+export const deleteTopic = async (req, res) => {
+  try {
+    const topic = await Topic.findById(req.params.id);
+
+    if (!topic) {
+      return res.status(404).json({ message: "Topic not found" });
+    }
+
+    if (topic.user.toString() !== req.user._id.toString()) {
+      return res
+        .status(401)
+        .json({ message: "Not authorized to delete this topic" });
+    }
+
+    await Topic.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Topic removed" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
