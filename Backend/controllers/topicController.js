@@ -63,8 +63,8 @@ export const completeTopic = async (req, res) => {
         .json({ message: "Not authorized to update this topic" });
     }
 
-    topic.completed = true;
-    topic.completedAt = Date.now();
+    topic.completed = !topic.completed;
+    topic.completedAt = topic.completed ? Date.now() : null;
 
     const updatedTopic = await topic.save();
     res.status(200).json(updatedTopic);
@@ -92,6 +92,21 @@ export const deleteTopic = async (req, res) => {
 
     await Topic.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Topic removed" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+// @desc    Delete all topics for a specific subject
+// @route   DELETE /api/topics/subject/:subjectId
+// @access  Private
+export const deleteAllTopicsForSubject = async (req, res) => {
+  try {
+    await Topic.deleteMany({
+      subject: req.params.subjectId,
+      user: req.user._id,
+    });
+    res.status(200).json({ message: "All topics removed for subject" });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
