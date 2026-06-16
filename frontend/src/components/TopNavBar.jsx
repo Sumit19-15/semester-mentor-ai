@@ -38,15 +38,8 @@ export default function TopNavBar() {
     <nav className={navClasses}>
       {/* Left Side */}
       {isDashboardPage ? (
-        <div className="flex-1 max-w-md hidden md:block">
-          <div className="relative flex items-center text-secondary focus-within:text-primary">
-            <Search className="absolute left-3 w-5 h-5 pointer-events-none" />
-            <input 
-              className="w-full bg-surface-container-lowest border border-surface-variant rounded-lg py-1.5 pl-10 pr-4 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-150 placeholder:text-secondary-fixed-dim" 
-              placeholder="Search resources..." 
-              type="text" 
-            />
-          </div>
+        <div className="flex-1 hidden md:block">
+          {/* Search bar removed as per requirements */}
         </div>
       ) : (
         <div className="flex items-center gap-stack_sm">

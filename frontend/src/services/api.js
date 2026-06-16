@@ -26,7 +26,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Handle unauthorized access (e.g., force logout)
-      useAuthStore.getState().logout();
+      useAuthStore.getState().logoutLocal();
       // Optionally redirect to login
       // window.location.href = '/login';
     }

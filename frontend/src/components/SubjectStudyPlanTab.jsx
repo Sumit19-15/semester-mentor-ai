@@ -1,0 +1,156 @@
+import { Calendar, Clock, CheckCircle2, Target, BookOpen, AlertCircle } from 'lucide-react';
+import { useSubjectStore } from '../store/useSubjectStore';
+
+export default function SubjectStudyPlanTab() {
+  const { activeStudyPlan } = useSubjectStore();
+
+  if (!activeStudyPlan) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4 text-secondary">
+          <Calendar className="w-8 h-8" />
+        </div>
+        <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">No Study Plan Selected</h3>
+        <p className="font-body-md text-secondary max-w-md">
+          Generate a new study plan from the left sidebar or select an existing one to view your schedule.
+        </p>
+      </div>
+    );
+  }
+
+  const { planData, startDate, endDate } = activeStudyPlan;
+  
+  // Try to use the AI's plan if available, else fallback
+  const plan = planData?.plan || planData;
+  const summary = plan?.summary || "Study Plan";
+  const dailyPlans = plan?.daily || [];
+  const weeklyPlans = plan?.weekly || [];
+
+  return (
+    <div className="flex flex-col gap-8 pb-8">
+      {/* Header Info */}
+      <div className="bg-gradient-to-br from-primary-container/40 to-surface-container-lowest rounded-2xl border border-primary/20 p-6 sm:p-8 shadow-sm">
+        <div className="flex items-start justify-between gap-4 flex-col sm:flex-row mb-4">
+          <div>
+            <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-2 flex items-center gap-2">
+              <Target className="w-6 h-6 text-primary" />
+              Your Study Strategy
+            </h2>
+            <p className="font-body-md text-on-surface-variant max-w-3xl leading-relaxed">
+              {summary}
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-2 shrink-0 bg-surface-container-lowest p-3 rounded-xl border border-outline-variant shadow-sm">
+            <div className="flex items-center gap-2 font-label-sm text-[12px] font-bold uppercase tracking-wider text-secondary">
+              <Calendar className="w-4 h-4" />
+              Timeframe
+            </div>
+            <div className="font-label-md text-on-surface font-semibold">
+              {new Date(startDate).toLocaleDateString()} - {new Date(endDate || startDate).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+        
+        {plan?.assumptions && plan.assumptions.length > 0 && (
+          <div className="mt-6 bg-surface-container/50 rounded-xl p-4 border border-outline-variant/50">
+            <h4 className="font-label-sm font-bold text-secondary uppercase tracking-wider mb-2 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" /> Keep in mind
+            </h4>
+            <ul className="list-disc pl-5 font-body-sm text-secondary space-y-1">
+              {plan.assumptions.map((assumption, idx) => (
+                <li key={idx}>{assumption}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Daily Plan */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <h3 className="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2 border-b border-outline-variant pb-3">
+            <Clock className="w-5 h-5 text-primary" />
+            Daily Breakdown
+          </h3>
+          
+          <div className="flex flex-col gap-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-outline-variant before:to-transparent">
+            {dailyPlans.map((day, idx) => (
+              <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-surface bg-primary-container text-primary font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                  {idx + 1}
+                </div>
+                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow hover:border-primary/30">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="font-label-md text-primary font-bold">{day.date}</span>
+                    <span className="bg-secondary-container/30 text-secondary-fixed-dim px-2 py-0.5 rounded font-label-sm text-[10px] uppercase font-bold tracking-wider flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {day.durationHours} hrs
+                    </span>
+                  </div>
+                  
+                  {day.topics && day.topics.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {day.topics.map((t, i) => (
+                        <span key={i} className="bg-surface-variant text-on-surface-variant text-[11px] px-2 py-0.5 rounded-full font-medium">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <ul className="space-y-2 mb-4">
+                    {day.tasks?.map((task, i) => (
+                      <li key={i} className="flex items-start gap-2 font-body-sm text-on-surface">
+                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <span className="leading-tight">{task}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {day.revision && (
+                    <div className="bg-primary-container/20 border-l-2 border-primary p-2.5 rounded-r-lg">
+                      <p className="font-label-sm font-bold text-primary mb-0.5 flex items-center gap-1">
+                        <BookOpen className="w-3.5 h-3.5" /> Revision
+                      </p>
+                      <p className="font-body-sm text-[12px] text-on-surface-variant leading-tight">{day.revision}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Column: Weekly Highlights */}
+        <div className="flex flex-col gap-6">
+          <h3 className="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2 border-b border-outline-variant pb-3">
+            <Target className="w-5 h-5 text-secondary" />
+            Weekly Goals
+          </h3>
+          
+          <div className="flex flex-col gap-4">
+            {weeklyPlans.map((week, idx) => (
+              <div key={idx} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+                <h4 className="font-label-md font-bold text-on-surface mb-1">{week.week}</h4>
+                <p className="font-body-sm text-secondary mb-3">{week.focus}</p>
+                
+                {week.deliverables && week.deliverables.length > 0 && (
+                  <div className="mt-3">
+                    <h5 className="font-label-sm font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Deliverables</h5>
+                    <ul className="space-y-1.5">
+                      {week.deliverables.map((del, i) => (
+                        <li key={i} className="flex items-start gap-2 font-body-sm text-on-surface-variant text-[13px]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5"></span>
+                          {del}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

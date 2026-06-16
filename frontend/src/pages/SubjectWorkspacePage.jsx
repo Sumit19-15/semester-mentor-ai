@@ -1,19 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
-import { Share2, PlayCircle, BookOpen, Plus, Upload, Loader2 } from 'lucide-react';
+import { Share2, PlayCircle, BookOpen, Plus, Upload, Loader2, Sparkles, Calendar, ChevronRight } from 'lucide-react';
 import DashboardLayout from '../layouts/DashboardLayout';
 import SubjectOverviewTab from '../components/SubjectOverviewTab';
 import SubjectNotesTab from '../components/SubjectNotesTab';
 import SubjectResourcesTab from '../components/SubjectResourcesTab';
 import SubjectPyqsTab from '../components/SubjectPyqsTab';
+import SubjectStudyPlanTab from '../components/SubjectStudyPlanTab';
+import AddSubjectModal from '../components/AddSubjectModal';
+import GeneratePlanModal from '../components/GeneratePlanModal';
 import { useSubjectStore } from '../store/useSubjectStore';
 import api from '../services/api';
 
 export default function SubjectWorkspacePage() {
   const [activeTab, setActiveTab] = useState('Topics');
   const [isParsing, setIsParsing] = useState(false);
+  const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
+  const [isGeneratePlanModalOpen, setIsGeneratePlanModalOpen] = useState(false);
   const fileInputRef = useRef(null);
   
-  const { subjects, activeSubject, setActiveSubject, fetchSubjects, fetchTopicsForSubject, fetchNotesForSubject, fetchResourcesForSubject, fetchPyqsForSubject, isLoading } = useSubjectStore();
+  const { 
+    subjects, activeSubject, setActiveSubject, fetchSubjects, 
+    fetchTopicsForSubject, fetchNotesForSubject, fetchResourcesForSubject, 
+    fetchPyqsForSubject, isLoading,
+    studyPlans, fetchStudyPlansForSubject, activeStudyPlan, setActiveStudyPlan
+  } = useSubjectStore();
 
   useEffect(() => {
     if (subjects.length === 0) {
@@ -27,14 +37,26 @@ export default function SubjectWorkspacePage() {
       fetchNotesForSubject(activeSubject._id);
       fetchResourcesForSubject(activeSubject._id);
       fetchPyqsForSubject(activeSubject._id);
+      fetchStudyPlansForSubject(activeSubject._id);
+      setActiveTab('Topics');
     }
-  }, [activeSubject?._id, fetchTopicsForSubject, fetchNotesForSubject, fetchResourcesForSubject, fetchPyqsForSubject]);
+  }, [activeSubject?._id, fetchTopicsForSubject, fetchNotesForSubject, fetchResourcesForSubject, fetchPyqsForSubject, fetchStudyPlansForSubject]);
 
-  if (isLoading || !activeSubject) {
+  if (isLoading && !activeSubject) {
     return (
       <DashboardLayout>
         <div className="flex w-full h-full items-center justify-center">
           <span className="text-secondary">Loading workspace...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!activeSubject) {
+    return (
+      <DashboardLayout>
+        <div className="flex w-full h-full items-center justify-center">
+          <span className="text-secondary">No subjects found. Please add a subject first.</span>
         </div>
       </DashboardLayout>
     );
@@ -67,6 +89,23 @@ export default function SubjectWorkspacePage() {
     }
   };
 
+  const handleResumeLearning = () => {
+    if (studyPlans && studyPlans.length > 0) {
+      setActiveStudyPlan(studyPlans[0]);
+      setActiveTab('Study Plan');
+    } else {
+      alert("No study plan generated yet. Please generate one first.");
+    }
+  };
+
+  const handlePlanGenerated = (newPlan) => {
+    setIsGeneratePlanModalOpen(false);
+    if (newPlan) {
+      setActiveStudyPlan(newPlan);
+      setActiveTab('Study Plan');
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="flex w-full h-full overflow-hidden">
@@ -81,13 +120,49 @@ export default function SubjectWorkspacePage() {
             <h3 className="font-headline-sm text-[18px] font-bold text-on-surface leading-tight">
               {activeSubject.name}
             </h3>
-            <button className="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-md text-[14px] py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors duration-150 shadow-sm font-semibold mt-1">
-              <Plus className="w-4 h-4" />
-              Add Subject
+            
+            <button 
+              className="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-md text-[14px] py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors duration-150 shadow-sm font-semibold mt-1"
+              onClick={() => setIsGeneratePlanModalOpen(true)}
+            >
+              <Sparkles className="w-4 h-4" />
+              Generate Plan
             </button>
           </div>
           <div className="flex-1 overflow-y-auto custom-scrollbar p-2 flex flex-col gap-1">
-            <div className="px-3 py-2 font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider mt-2 mb-1 font-semibold">All Subjects</div>
+            <div className="px-3 py-2 font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider mt-2 mb-1 font-semibold flex justify-between items-center">
+              <span>Study Plans</span>
+            </div>
+            
+            {studyPlans && studyPlans.length > 0 ? (
+              studyPlans.map((plan) => (
+                <button 
+                  key={plan._id}
+                  onClick={() => {
+                    setActiveStudyPlan(plan);
+                    setActiveTab('Study Plan');
+                  }}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between group ${activeTab === 'Study Plan' && activeStudyPlan?._id === plan._id ? 'bg-surface-container-high' : 'hover:bg-surface-container'}`}
+                >
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="w-8 h-8 rounded bg-primary-container/30 flex items-center justify-center text-primary shrink-0">
+                      <Calendar className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 overflow-hidden">
+                      <span className={`font-label-md text-[13px] font-semibold truncate transition-colors ${activeTab === 'Study Plan' && activeStudyPlan?._id === plan._id ? 'text-primary' : 'text-on-surface group-hover:text-primary'}`}>
+                        {new Date(plan.startDate).toLocaleDateString()}
+                      </span>
+                      <span className="font-label-sm text-[10px] text-on-surface-variant truncate">{plan.dailyHours} hrs/day</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-secondary group-hover:text-primary shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              ))
+            ) : (
+              <div className="px-3 py-2 text-xs text-secondary">No plans generated yet.</div>
+            )}
+
+            <div className="px-3 py-2 font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider mt-4 mb-1 font-semibold border-t border-outline-variant/30 pt-4">All Subjects</div>
             
             {subjects.map((sub) => (
               <button 
@@ -132,7 +207,10 @@ export default function SubjectWorkspacePage() {
                     {isParsing ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Upload className="w-4 h-4 text-primary" />}
                     {isParsing ? 'Parsing...' : 'Upload Syllabus'}
                   </button>
-                  <button className="flex items-center gap-2 px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md text-[14px] font-semibold hover:opacity-90 transition-all shadow-sm">
+                  <button 
+                    onClick={handleResumeLearning}
+                    className="flex items-center gap-2 px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md text-[14px] font-semibold hover:opacity-90 transition-all shadow-sm"
+                  >
                     <PlayCircle className="w-4 h-4" />
                     Resume Learning
                   </button>
@@ -143,7 +221,7 @@ export default function SubjectWorkspacePage() {
             {/* Navigation Tabs */}
             <div className="border-b border-outline-variant mb-8" data-purpose="workspace-tabs">
               <nav className="flex gap-8 overflow-x-auto custom-scrollbar">
-                {['Topics', 'Resources', 'Notes', 'PYQs'].map((tab) => (
+                {['Topics', 'Study Plan', 'Resources', 'Notes', 'PYQs'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -161,6 +239,7 @@ export default function SubjectWorkspacePage() {
 
             {/* Render Active Tab Content */}
             {activeTab === 'Topics' && <SubjectOverviewTab />}
+            {activeTab === 'Study Plan' && <SubjectStudyPlanTab />}
             {activeTab === 'Notes' && <SubjectNotesTab />}
             {activeTab === 'Resources' && <SubjectResourcesTab />}
             {activeTab === 'PYQs' && <SubjectPyqsTab />}
@@ -168,6 +247,16 @@ export default function SubjectWorkspacePage() {
           </div>
         </main>
       </div>
+
+      <AddSubjectModal 
+        isOpen={isAddSubjectModalOpen} 
+        onClose={() => setIsAddSubjectModalOpen(false)} 
+      />
+      <GeneratePlanModal
+        isOpen={isGeneratePlanModalOpen}
+        onClose={handlePlanGenerated}
+        subjectId={activeSubject._id}
+      />
     </DashboardLayout>
   );
 }

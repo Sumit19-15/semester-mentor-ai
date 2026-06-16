@@ -1,14 +1,20 @@
+import { useState } from 'react';
 import { Search, FileText, Eye, Download, Upload } from 'lucide-react';
 import { useSubjectStore } from '../store/useSubjectStore';
+import UploadFileModal from './UploadFileModal';
 
 export default function SubjectPyqsTab() {
-  const { pyqs } = useSubjectStore();
+  const { pyqs, activeSubject } = useSubjectStore();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
       {/* Tab Actions Header */}
       <div className="flex justify-end mb-2">
-        <button className="bg-primary-container text-on-primary-container font-label-md text-[14px] px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary hover:text-on-primary transition-colors shadow-sm font-semibold">
+        <button 
+          onClick={() => setIsUploadModalOpen(true)}
+          className="bg-primary-container text-on-primary-container font-label-md text-[14px] px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary hover:text-on-primary transition-colors shadow-sm font-semibold"
+        >
           <Upload className="w-4 h-4" />
           Upload Paper
         </button>
@@ -16,27 +22,6 @@ export default function SubjectPyqsTab() {
 
       {/* Content Area: PYQs List */}
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-
-        {/* Filters / Search */}
-        <div className="p-4 border-b border-outline-variant bg-surface-container flex justify-between items-center">
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary w-4 h-4" />
-              <input
-                className="w-full h-9 pl-9 pr-3 bg-surface border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all"
-                placeholder="Search papers..."
-                type="text"
-              />
-            </div>
-            <select className="h-9 w-full sm:w-auto px-3 pr-8 bg-surface border border-outline-variant rounded-lg font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all appearance-none cursor-pointer">
-              <option>All Years</option>
-              <option>2026</option>
-              <option>2025</option>
-              <option>2024</option>
-            </select>
-          </div>
-        </div>
-
         {/* List */}
         <div className="divide-y divide-outline-variant">
 
@@ -71,6 +56,13 @@ export default function SubjectPyqsTab() {
 
         </div>
       </div>
+
+      <UploadFileModal 
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        subjectId={activeSubject?._id}
+        uploadType="pyqs"
+      />
     </div>
   );
 }

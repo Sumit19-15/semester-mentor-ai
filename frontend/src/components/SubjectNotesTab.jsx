@@ -1,21 +1,19 @@
+import { useState } from 'react';
 import { Search, Plus, FileText } from 'lucide-react';
 import { useSubjectStore } from '../store/useSubjectStore';
+import UploadFileModal from './UploadFileModal';
 
 export default function SubjectNotesTab() {
-  const { notes } = useSubjectStore();
+  const { notes, activeSubject } = useSubjectStore();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-stack_md">
-        <div className="relative w-full max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-outline w-5 h-5" />
-          <input 
-            className="w-full pl-10 pr-3 py-2 bg-surface rounded-lg border border-outline-variant font-body-md text-[14px] focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" 
-            placeholder="Filter notes..." 
-            type="text" 
-          />
-        </div>
-        <button className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-[14px] font-semibold flex items-center gap-2 hover:bg-primary hover:text-on-primary transition-colors shadow-sm">
+      <div className="flex justify-end items-center mb-stack_md">
+        <button 
+          onClick={() => setIsUploadModalOpen(true)}
+          className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-[14px] font-semibold flex items-center gap-2 hover:bg-primary hover:text-on-primary transition-colors shadow-sm"
+        >
           <Plus className="w-5 h-5" />
           Create Note
         </button>
@@ -53,6 +51,13 @@ export default function SubjectNotesTab() {
 
         </div>
       </div>
+
+      <UploadFileModal 
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        subjectId={activeSubject?._id}
+        uploadType="notes"
+      />
     </div>
   );
 }

@@ -1,14 +1,20 @@
+import { useState } from 'react';
 import { FileText, Link as LinkIcon, MoreVertical, Upload } from 'lucide-react';
 import { useSubjectStore } from '../store/useSubjectStore';
+import UploadFileModal from './UploadFileModal';
 
 export default function SubjectResourcesTab() {
-  const { resources } = useSubjectStore();
+  const { resources, activeSubject } = useSubjectStore();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
       {/* Tab Actions Header */}
       <div className="flex justify-end mb-2">
-        <button className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-[14px] flex items-center gap-2 hover:bg-primary hover:text-on-primary transition-colors duration-150 shadow-sm font-semibold">
+        <button 
+          onClick={() => setIsUploadModalOpen(true)}
+          className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-[14px] flex items-center gap-2 hover:bg-primary hover:text-on-primary transition-colors duration-150 shadow-sm font-semibold"
+        >
           <Upload className="w-4 h-4" />
           Upload Resource
         </button>
@@ -53,6 +59,13 @@ export default function SubjectResourcesTab() {
           </tbody>
         </table>
       </div>
+
+      <UploadFileModal 
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        subjectId={activeSubject?._id}
+        uploadType="resources"
+      />
     </div>
   );
 }

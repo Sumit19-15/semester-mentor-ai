@@ -100,5 +100,81 @@ export const useSubjectStore = create((set, get) => ({
     } catch (error) {
       set({ error: error.response?.data?.message || 'Failed to fetch pyqs', isLoading: false });
     }
+  },
+
+  // Create a new subject
+  createSubject: async (subjectData) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post('/subjects', subjectData);
+      set((state) => ({ 
+        subjects: [...state.subjects, response.data],
+        isLoading: false 
+      }));
+      return response.data;
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to create subject', isLoading: false });
+      throw error;
+    }
+  },
+
+  studyPlans: [],
+  activeStudyPlan: null,
+
+  fetchStudyPlansForSubject: async (subjectId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.get(`/study-plans/${subjectId}`);
+      set({ studyPlans: response.data, isLoading: false });
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to fetch study plans', isLoading: false });
+    }
+  },
+
+  setActiveStudyPlan: (plan) => {
+    set({ activeStudyPlan: plan });
+  },
+
+  createTopic: async (topicData) => {
+    try {
+      const response = await api.post('/topics', topicData);
+      set((state) => ({
+        topics: [...state.topics, response.data],
+        subjects: state.subjects.map(sub => 
+          sub._id === topicData.subject ? { ...sub, topics: [...(sub.topics || []), response.data] } : sub
+        )
+      }));
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deleteTopic: async (topicId, subjectId) => {
+    try {
+      await api.delete(`/topics/${topicId}`);
+      set((state) => ({
+        topics: state.topics.filter(t => t._id !== topicId),
+        subjects: state.subjects.map(sub => 
+          sub._id === subjectId ? { ...sub, topics: sub.topics.filter(t => t._id !== topicId) } : sub
+        )
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  completeTopic: async (topicId, subjectId) => {
+    try {
+      const response = await api.put(`/topics/${topicId}/complete`);
+      set((state) => ({
+        topics: state.topics.map(t => t._id === topicId ? response.data : t),
+        subjects: state.subjects.map(sub => 
+          sub._id === subjectId ? { ...sub, topics: sub.topics.map(t => t._id === topicId ? response.data : t) } : sub
+        )
+      }));
+    } catch (error) {
+      throw error;
+    }
   }
 }));

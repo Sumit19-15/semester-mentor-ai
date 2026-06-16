@@ -20,9 +20,22 @@ export const useAuthStore = create((set) => ({
     }
     set({ user: userData, isAuthenticated: true });
   },
-  logout: () => {
+  logoutLocal: () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     set({ user: null, isAuthenticated: false });
+  },
+  logout: async () => {
+    try {
+      // Avoid circular dependency by importing dynamically or just removing locally if api call fails
+      const api = (await import('../services/api')).default;
+      await api.post('/users/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      set({ user: null, isAuthenticated: false });
+    }
   },
 }));

@@ -72,7 +72,13 @@ export default function SideNavBar() {
           Settings
         </NavLink>
 
-        <button className="w-full flex items-center gap-4 px-3 py-2 rounded-lg text-secondary hover:bg-error-container hover:text-on-error-container transition-colors duration-150 cursor-pointer text-left">
+        <button 
+          onClick={async () => {
+            const { useAuthStore } = await import('../store/authStore');
+            useAuthStore.getState().logout();
+          }}
+          className="w-full flex items-center gap-4 px-3 py-2 rounded-lg text-secondary hover:bg-error-container hover:text-on-error-container transition-colors duration-150 cursor-pointer text-left"
+        >
           <LogOut className="w-5 h-5" />
           <span className="font-body-md text-[14px] font-medium">
             Log out

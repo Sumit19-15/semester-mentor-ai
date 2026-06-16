@@ -1,15 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useSubjectStore } from '../store/useSubjectStore';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { FileText, Plus, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import AddSubjectModal from '../components/AddSubjectModal';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const { subjects, fetchSubjects, isLoading, fetchAllTopics, allTopics, setActiveSubject } = useSubjectStore();
   const navigate = useNavigate();
   const userName = user?.name?.split(' ')[0] || 'Student';
+  const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
 
   useEffect(() => {
     fetchSubjects();
@@ -41,7 +43,16 @@ export default function DashboardPage() {
       <section className="mb-stack_lg">
         <div className="flex justify-between items-center mb-stack_md">
           <h3 className="font-headline-sm text-headline-sm text-on-surface">My Subjects</h3>
-          <button className="font-label-md text-label-md text-primary hover:underline cursor-pointer" onClick={() => navigate('/subjects')}>View All</button>
+          <div className="flex gap-4 items-center">
+            <button className="font-label-md text-label-md text-primary hover:underline cursor-pointer" onClick={() => navigate('/subjects')}>View All</button>
+            <button 
+              className="font-label-md text-label-md text-on-background bg-surface-container-lowest border border-surface-variant rounded-lg px-3 py-1.5 hover:bg-surface-container-low transition-colors flex items-center gap-1 cursor-pointer"
+              onClick={() => setIsAddSubjectModalOpen(true)}
+            >
+              <Plus className="w-4 h-4" />
+              Add Subject
+            </button>
+          </div>
         </div>
         
         {isLoading ? (
@@ -113,6 +124,12 @@ export default function DashboardPage() {
 
         </div>
       </section>
+
+      {/* Add Subject Modal */}
+      <AddSubjectModal 
+        isOpen={isAddSubjectModalOpen} 
+        onClose={() => setIsAddSubjectModalOpen(false)} 
+      />
     </DashboardLayout>
   );
 }
