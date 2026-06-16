@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
-import axios from 'axios';
+import { Mail, Lock, Loader2 } from 'lucide-react';
+import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
 export default function LoginPage() {
@@ -20,16 +20,14 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // Setup for actual backend integration when available
-      // const response = await axios.post('/api/auth/login', { email, password });
-      // login(response.data.user);
-      
-      // Simulating network delay for now
+      // Intentionally show a delay with loader
       await new Promise(resolve => setTimeout(resolve, 1000));
-      login({ email, name: 'Student' });
+      
+      const response = await api.post('/users/login', { email, password });
+      login(response.data);
       navigate('/dashboard'); 
     } catch (err) {
-      setError('Invalid email or password');
+      setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
       setIsLoading(false);
     }
@@ -109,10 +107,11 @@ export default function LoginPage() {
 
             {/* Login Button */}
             <button 
-              className="w-full h-[48px] mt-stack_md bg-primary-fixed-dim hover:bg-[#ffc66b] text-[#291800] rounded-lg font-headline-sm text-headline-sm flex items-center justify-center transition-colors duration-150 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed" 
+              className="w-full h-[48px] mt-stack_md bg-primary-fixed-dim hover:bg-[#ffc66b] text-[#291800] rounded-lg font-headline-sm text-headline-sm flex items-center justify-center gap-2 transition-colors duration-150 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed" 
               type="submit"
               disabled={isLoading}
             >
+              {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
               {isLoading ? 'Logging in...' : 'Login'}
             </button>
           </form>

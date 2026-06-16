@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Upload, FileText } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Upload, FileText, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 
@@ -45,10 +45,22 @@ export default function OnboardingPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call for registration
+      // Intentionally show a delay with loader
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const response = await api.post('/users/register', {
+        name: fullName,
+        email,
+        password,
+        collegeName: university,
+        branch: major,
+        semester,
+        interests: goals,
+        dailyFreeHours: 4, // Default value
+      });
+      
       // Upon successful registration, authenticate the user
-      login({ email, name: fullName, university, major, semester, goals });
+      login(response.data);
       
       // If a curriculum file was uploaded, parse it to generate subjects
       if (curriculumFile) {
@@ -62,6 +74,7 @@ export default function OnboardingPage() {
       navigate('/dashboard'); 
     } catch (error) {
       console.error("Registration failed", error);
+      alert(error.response?.data?.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -264,7 +277,8 @@ export default function OnboardingPage() {
                 type="submit"
                 disabled={isLoading}
               >
-                <span>
+                <span className="flex items-center">
+                  {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                   {isLoading ? 'Processing...' : step === 3 ? 'Finish' : 'Continue'}
                 </span>
                 {!isLoading && step < 3 && <ArrowRight size={18} />}

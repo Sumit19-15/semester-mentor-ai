@@ -7,13 +7,14 @@ import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const { subjects, fetchSubjects, isLoading } = useSubjectStore();
+  const { subjects, fetchSubjects, isLoading, fetchAllTopics, allTopics, setActiveSubject } = useSubjectStore();
   const navigate = useNavigate();
   const userName = user?.name?.split(' ')[0] || 'Student';
 
   useEffect(() => {
     fetchSubjects();
-  }, [fetchSubjects]);
+    fetchAllTopics();
+  }, [fetchSubjects, fetchAllTopics]);
 
   // Format today's date
   const today = new Date().toLocaleDateString('en-US', {
@@ -40,21 +41,21 @@ export default function DashboardPage() {
       <section className="mb-stack_lg">
         <div className="flex justify-between items-center mb-stack_md">
           <h3 className="font-headline-sm text-headline-sm text-on-surface">My Subjects</h3>
-          <button className="font-label-md text-label-md text-primary hover:underline cursor-pointer">View All</button>
+          <button className="font-label-md text-label-md text-primary hover:underline cursor-pointer" onClick={() => navigate('/subjects')}>View All</button>
         </div>
         
         {isLoading ? (
           <div className="text-secondary">Loading subjects...</div>
         ) : subjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-stack_md">
-            {subjects.slice(0, 3).map((sub) => {
+            {subjects.slice(0, 6).map((sub) => {
               // Calculate completion percentage based on topics if available
               const completedTopics = sub.topics?.filter(t => t.completed).length || 0;
               const totalTopics = sub.topics?.length || 1;
-              const completion = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+              const completion = sub.topics?.length > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
               return (
-                <div key={sub._id} className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px]" onClick={() => navigate('/subjects')}>
+                <div key={sub._id} className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px]" onClick={() => { setActiveSubject(sub); navigate('/subjects'); }}>
                   <div className="flex justify-between items-start mb-4">
                     <h4 className="font-headline-sm text-headline-sm text-on-surface leading-tight">{sub.name}</h4>
                     <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ml-2">{sub.courseCode || 'Course'}</span>
@@ -90,14 +91,9 @@ export default function DashboardPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-stack_sm">
           
-          {[
-            { title: "Final Year Thesis Draft", time: "Last active 2 days ago" },
-            { title: "Algorithm Analysis Paper", time: "Last active 4 days ago" },
-            { title: "Usability Study Results", time: "Last active 1 week ago" },
-            { title: "Semester Reading List", time: "Last active 2 weeks ago" }
-          ].map((moduleItem, idx) => (
+          {allTopics.length > 0 ? allTopics.slice(0, 4).map((topicItem, idx) => (
             <button 
-              key={idx} 
+              key={topicItem._id || idx} 
               onClick={() => navigate('/module-chat')}
               className="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack_md text-left hover:shadow-sm hover:border-primary/50 transition-all duration-200 group flex flex-col h-full"
             >
@@ -105,11 +101,15 @@ export default function DashboardPage() {
                 <FileText className="w-5 h-5" />
               </div>
               <div className="mb-4">
-                <h5 className="font-label-md text-label-md text-on-surface truncate w-full">{moduleItem.title}</h5>
-                <p className="font-label-sm text-label-sm text-secondary mt-0.5">{moduleItem.time}</p>
+                <h5 className="font-label-md text-label-md text-on-surface truncate w-full">{topicItem.title}</h5>
+                <p className="font-label-sm text-label-sm text-secondary mt-0.5">{topicItem.subject?.name || 'Topic'}</p>
               </div>
             </button>
-          ))}
+          )) : (
+            <div className="col-span-full text-secondary text-center py-4 bg-surface-container-lowest rounded-lg border border-outline-variant">
+              No modules or topics found yet.
+            </div>
+          )}
 
         </div>
       </section>

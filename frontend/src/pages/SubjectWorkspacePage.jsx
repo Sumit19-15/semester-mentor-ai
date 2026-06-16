@@ -13,13 +13,22 @@ export default function SubjectWorkspacePage() {
   const [isParsing, setIsParsing] = useState(false);
   const fileInputRef = useRef(null);
   
-  const { subjects, activeSubject, setActiveSubject, fetchSubjects, fetchTopicsForSubject, isLoading } = useSubjectStore();
+  const { subjects, activeSubject, setActiveSubject, fetchSubjects, fetchTopicsForSubject, fetchNotesForSubject, fetchResourcesForSubject, fetchPyqsForSubject, isLoading } = useSubjectStore();
 
   useEffect(() => {
     if (subjects.length === 0) {
       fetchSubjects();
     }
   }, [subjects.length, fetchSubjects]);
+
+  useEffect(() => {
+    if (activeSubject?._id) {
+      fetchTopicsForSubject(activeSubject._id);
+      fetchNotesForSubject(activeSubject._id);
+      fetchResourcesForSubject(activeSubject._id);
+      fetchPyqsForSubject(activeSubject._id);
+    }
+  }, [activeSubject?._id, fetchTopicsForSubject, fetchNotesForSubject, fetchResourcesForSubject, fetchPyqsForSubject]);
 
   if (isLoading || !activeSubject) {
     return (
