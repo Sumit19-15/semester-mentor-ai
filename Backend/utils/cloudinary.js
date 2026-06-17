@@ -14,7 +14,7 @@ const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null;
         // Upload the file on cloudinary
-        const response = await cloudinary.uploader.upload(localFilePath, {
+        const response = await cloudinary.uploader.unsigned_upload(localFilePath, "Semester Mentor", {
             resource_type: "auto"
         });
         // File has been uploaded successfully
