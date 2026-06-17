@@ -12,6 +12,15 @@ import SubjectWorkspacePage from './pages/SubjectWorkspacePage';
 import AiModuleChatPage from './pages/AiModuleChatPage';
 import SettingsPage from './pages/SettingsPage';
 import DashboardLayout from './layouts/DashboardLayout';
+import { useAuthStore } from './store/authStore';
+
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuthStore();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function App() {
   const theme = useThemeStore((state) => state.theme);
@@ -35,15 +44,17 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<OnboardingPage />} />
         
-        {/* Dashboard routes nested inside layout manually for now */}
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/subjects" element={<SubjectWorkspacePage />} />
-        <Route path="/module-chat" element={<AiModuleChatPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        {/* Protected Dashboard routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/subjects" element={<ProtectedRoute><SubjectWorkspacePage /></ProtectedRoute>} />
+        <Route path="/module-chat" element={<ProtectedRoute><AiModuleChatPage /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
         <Route path="/chats" element={
-          <DashboardLayout>
-            <MentorChatPage />
-          </DashboardLayout>
+          <ProtectedRoute>
+            <DashboardLayout>
+              <MentorChatPage />
+            </DashboardLayout>
+          </ProtectedRoute>
         } />
       </Routes>
     </Router>

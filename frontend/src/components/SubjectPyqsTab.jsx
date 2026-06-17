@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, FileText, ExternalLink, Download, Upload, Trash2 } from 'lucide-react';
+import { Search, FileText, ExternalLink, Download, Upload, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSubjectStore } from '../store/useSubjectStore';
 import UploadFileModal from './UploadFileModal';
@@ -8,6 +8,38 @@ import toast from 'react-hot-toast';
 export default function SubjectPyqsTab() {
   const { pyqs, activeSubject, deletePyq } = useSubjectStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownload = async (e, pyq) => {
+    if (e) e.stopPropagation();
+    if (pyq.uploadType === 'link') {
+      window.open(pyq.fileUrl || pyq.link, '_blank');
+      return;
+    }
+
+    if (e) e.preventDefault();
+    setDownloadingId(pyq._id);
+    try {
+      const url = pyq.fileUrl || pyq.link;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network error');
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      const ext = url.split('.').pop() || 'pdf';
+      link.download = `${pyq.title || `PYQ_${pyq.year}`}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed', error);
+      window.open(pyq.fileUrl || pyq.link, '_blank');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
@@ -43,7 +75,8 @@ export default function SubjectPyqsTab() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 hover:bg-surface-container transition-colors group gap-4"
+              onClick={() => handleDownload(null, pyq)}
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 hover:bg-surface-container transition-colors group gap-4 cursor-pointer"
             >
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div className="w-10 h-10 shrink-0 rounded bg-primary-container/20 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary-container/40 transition-colors">
@@ -58,9 +91,20 @@ export default function SubjectPyqsTab() {
                 </div>
               </div>
               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-14 sm:ml-0 focus-within:opacity-100">
-                <a href={pyq.fileUrl || '#'} target="_blank" rel="noreferrer" className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" title={pyq.uploadType === 'upload' ? 'Download' : 'Open Link'}>
-                  {pyq.uploadType === 'upload' ? <Download className="w-5 h-5" /> : <ExternalLink className="w-5 h-5" />}
-                </a>
+                <button 
+                  onClick={(e) => handleDownload(e, pyq)} 
+                  className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" 
+                  title={pyq.uploadType === 'upload' ? 'Download' : 'Open Link'}
+                  disabled={downloadingId === pyq._id}
+                >
+                  {downloadingId === pyq._id ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  ) : pyq.uploadType === 'upload' ? (
+                    <Download className="w-5 h-5" />
+                  ) : (
+                    <ExternalLink className="w-5 h-5" />
+                  )}
+                </button>
                 <button onClick={(e) => handleDelete(e, pyq._id)} className="p-2 text-secondary hover:text-error hover:bg-error/10 rounded-lg transition-colors block" title="Delete PYQ">
                   <Trash2 className="w-5 h-5" />
                 </button>

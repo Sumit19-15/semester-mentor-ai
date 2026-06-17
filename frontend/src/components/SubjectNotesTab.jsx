@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, FileText, Download, ExternalLink, Trash2 } from 'lucide-react';
+import { Search, Plus, FileText, Download, ExternalLink, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSubjectStore } from '../store/useSubjectStore';
 import UploadFileModal from './UploadFileModal';
@@ -8,6 +8,39 @@ import toast from 'react-hot-toast';
 export default function SubjectNotesTab() {
   const { notes, activeSubject, deleteNote } = useSubjectStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownload = async (e, note) => {
+    if (e) e.stopPropagation();
+    if (note.uploadType === 'link') {
+      window.open(note.fileUrl || note.link, '_blank');
+      return;
+    }
+
+    if (e) e.preventDefault();
+    setDownloadingId(note._id);
+    try {
+      const url = note.fileUrl || note.link;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network error');
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      const ext = url.split('.').pop() || 'pdf';
+      link.download = `${note.title || 'Note'}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed', error);
+      // Fallback
+      window.open(note.fileUrl || note.link, '_blank');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
@@ -41,7 +74,8 @@ export default function SubjectNotesTab() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="p-4 hover:bg-surface-container-low transition-colors duration-150 group flex items-center justify-between"
+              onClick={() => handleDownload(null, note)}
+              className="p-4 hover:bg-surface-container-low transition-colors duration-150 group flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-start gap-4 flex-1">
                 <div className="mt-1 text-primary shrink-0 w-10 h-10 rounded bg-primary-container/20 flex items-center justify-center border border-primary/20">
@@ -60,9 +94,20 @@ export default function SubjectNotesTab() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <a href={note.fileUrl || '#'} target="_blank" rel="noreferrer" className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" title={note.uploadType === 'upload' ? "Download" : "Open Link"}>
-                    {note.uploadType === 'upload' ? <Download className="w-5 h-5" /> : <ExternalLink className="w-5 h-5" />}
-                  </a>
+                  <button 
+                    onClick={(e) => handleDownload(e, note)} 
+                    className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" 
+                    title={note.uploadType === 'upload' ? "Download" : "Open Link"}
+                    disabled={downloadingId === note._id}
+                  >
+                    {downloadingId === note._id ? (
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    ) : note.uploadType === 'upload' ? (
+                      <Download className="w-5 h-5" />
+                    ) : (
+                      <ExternalLink className="w-5 h-5" />
+                    )}
+                  </button>
                   <button onClick={(e) => handleDelete(e, note._id)} className="p-2 text-secondary hover:text-error hover:bg-error/10 rounded-lg transition-colors block" title="Delete Note">
                     <Trash2 className="w-5 h-5" />
                   </button>

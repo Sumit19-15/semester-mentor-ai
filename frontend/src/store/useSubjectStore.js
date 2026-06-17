@@ -32,7 +32,14 @@ export const useSubjectStore = create((set, get) => ({
 
   // Set active subject (which will be used to filter views in the workspace)
   setActiveSubject: (subject) => {
-    set({ activeSubject: subject, activeTopic: null, activeStudyPlan: null });
+    set({ 
+      activeSubject: subject, 
+      activeTopic: null, 
+      activeStudyPlan: null,
+      topics: subject?.topics || [],
+      // We can also optimistically set others if they were cached on the subject object,
+      // but topics is the most important one that causes layout shifts.
+    });
   },
 
   // Set active topic (useful for AiModuleChatPage tracking)

@@ -202,18 +202,26 @@ export default function SubjectStudyPlanTab() {
                   )}
 
                   <div className="flex items-center justify-between border-t border-outline-variant pt-3 mt-auto">
-                    <label 
-                      className="flex items-center gap-2 font-label-sm text-[12px] font-semibold text-on-surface cursor-pointer"
-                      onClick={(e) => e.stopPropagation()}
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleStudyPlanDay(activeStudyPlan._id, idx);
+                      }}
+                      className={`flex items-center gap-2 font-label-sm text-[12px] font-semibold px-3 py-1.5 rounded-md transition-colors ${
+                        activeStudyPlan.completedDays?.includes(idx) 
+                          ? 'bg-primary/10 text-primary border border-primary/30' 
+                          : 'bg-surface border border-outline-variant text-on-surface-variant hover:bg-surface-container'
+                      }`}
                     >
-                      <input 
-                        type="checkbox" 
-                        checked={activeStudyPlan.completedDays?.includes(idx) || false}
-                        onChange={() => toggleStudyPlanDay(activeStudyPlan._id, idx)}
-                        className="w-4 h-4 rounded text-primary focus:ring-primary cursor-pointer border-outline-variant"
-                      />
-                      Mark Day Complete
-                    </label>
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        activeStudyPlan.completedDays?.includes(idx)
+                          ? 'bg-primary border-primary text-on-primary'
+                          : 'border-outline-variant bg-surface'
+                      }`}>
+                        {activeStudyPlan.completedDays?.includes(idx) && <CheckCircle2 className="w-3 h-3" />}
+                      </div>
+                      {activeStudyPlan.completedDays?.includes(idx) ? 'Completed' : 'Mark Complete'}
+                    </button>
                   </div>
                 </div>
               </motion.div>

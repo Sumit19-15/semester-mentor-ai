@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import ThemeToggle from './ThemeToggle';
 import { BookOpen, Search, Bell, HelpCircle, LogOut, Settings } from 'lucide-react';
@@ -9,6 +9,7 @@ export default function TopNavBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuthStore();
 
   useEffect(() => {
@@ -133,6 +134,7 @@ export default function TopNavBar() {
                       onClick={() => {
                         setIsProfileOpen(false);
                         logout();
+                        navigate('/login');
                       }}
                       className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-error/10 hover:text-error transition-colors text-on-surface mt-1"
                     >

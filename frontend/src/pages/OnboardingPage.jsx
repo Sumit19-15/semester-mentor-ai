@@ -273,7 +273,7 @@ export default function OnboardingPage() {
               )}
               
               <button 
-                className="bg-primary-container text-on-primary-fixed-variant hover:bg-primary-fixed-dim font-label-md text-label-md px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-150 active:scale-95 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed" 
+                className="bg-primary text-on-primary hover:opacity-90 font-label-md text-label-md px-6 py-2 rounded-lg flex items-center space-x-2 transition-all duration-150 active:scale-95 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed" 
                 type="submit"
                 disabled={isLoading}
               >

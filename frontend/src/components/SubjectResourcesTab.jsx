@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Link as LinkIcon, Download, ExternalLink, Upload, Trash2 } from 'lucide-react';
+import { FileText, Link as LinkIcon, Download, ExternalLink, Upload, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSubjectStore } from '../store/useSubjectStore';
 import UploadFileModal from './UploadFileModal';
@@ -8,6 +8,38 @@ import toast from 'react-hot-toast';
 export default function SubjectResourcesTab() {
   const { resources, activeSubject, deleteResource } = useSubjectStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownload = async (e, resource) => {
+    if (e) e.stopPropagation();
+    if (resource.uploadType === 'link') {
+      window.open(resource.fileUrl || resource.link, '_blank');
+      return;
+    }
+
+    if (e) e.preventDefault();
+    setDownloadingId(resource._id);
+    try {
+      const url = resource.fileUrl || resource.link;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network error');
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      const ext = url.split('.').pop() || 'pdf';
+      link.download = `${resource.title || 'Resource'}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed', error);
+      window.open(resource.fileUrl || resource.link, '_blank');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
@@ -52,6 +84,7 @@ export default function SubjectResourcesTab() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
+                onClick={() => handleDownload(null, resource)}
                 className="border-b border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer"
               >
                 <td className="py-3 px-4">
@@ -63,9 +96,19 @@ export default function SubjectResourcesTab() {
                 <td className="py-3 px-4 text-secondary capitalize">{resource.type}</td>
                 <td className="py-3 px-4 text-secondary">{new Date(resource.createdAt).toLocaleDateString()}</td>
                 <td className="py-3 px-4 text-right flex justify-end gap-1">
-                  <a href={resource.link || '#'} target="_blank" rel="noreferrer" className="inline-flex text-secondary opacity-0 group-hover:opacity-100 hover:text-primary transition-all p-2 rounded-lg hover:bg-primary-container/20">
-                    {resource.uploadType === 'upload' ? <Download className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
-                  </a>
+                  <button 
+                    onClick={(e) => handleDownload(e, resource)} 
+                    className="inline-flex text-secondary opacity-0 group-hover:opacity-100 hover:text-primary transition-all p-2 rounded-lg hover:bg-primary-container/20"
+                    disabled={downloadingId === resource._id}
+                  >
+                    {downloadingId === resource._id ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    ) : resource.uploadType === 'upload' ? (
+                      <Download className="w-4 h-4" />
+                    ) : (
+                      <ExternalLink className="w-4 h-4" />
+                    )}
+                  </button>
                   <button onClick={(e) => handleDelete(e, resource._id)} className="inline-flex text-secondary opacity-0 group-hover:opacity-100 hover:text-error transition-all p-2 rounded-lg hover:bg-error/10">
                     <Trash2 className="w-4 h-4" />
                   </button>
