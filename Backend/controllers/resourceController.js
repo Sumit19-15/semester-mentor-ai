@@ -1,13 +1,27 @@
 import Resource from "../models/resourceModel.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 // @desc    Create a new resource
 // @route   POST /api/resources
 // @access  Private
 export const createResource = async (req, res) => {
   try {
-    const { subject, topic, title, link, type, description } = req.body;
+    const { subject, topic, title, link, type, description, uploadType } = req.body;
 
-    if (!title || !link || !type) {
+    let finalLink = link;
+
+    if (uploadType === "upload") {
+      if (!req.file) {
+        return res.status(400).json({ message: "Please upload a file" });
+      }
+      const uploadResponse = await uploadOnCloudinary(req.file.path);
+      if (!uploadResponse) {
+        return res.status(500).json({ message: "Failed to upload file to Cloudinary" });
+      }
+      finalLink = uploadResponse.secure_url;
+    }
+
+    if (!title || !finalLink || !type) {
       return res
         .status(400)
         .json({ message: "Title, link, and type are required." });
@@ -18,7 +32,8 @@ export const createResource = async (req, res) => {
       subject,
       topic,
       title,
-      link,
+      link: finalLink,
+      uploadType: uploadType || "link",
       type,
       description,
     });

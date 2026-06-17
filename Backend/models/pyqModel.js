@@ -12,9 +12,18 @@ const pyqSchema = mongoose.Schema(
       required: true,
       ref: "Subject",
     },
+    title: {
+      type: String,
+      default: "PYQ",
+    },
     fileUrl: {
       type: String,
       required: true,
+    },
+    uploadType: {
+      type: String,
+      enum: ['upload', 'link'],
+      default: 'upload',
     },
     year: {
       type: String,

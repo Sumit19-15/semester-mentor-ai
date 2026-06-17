@@ -24,6 +24,11 @@ const noteSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    uploadType: {
+      type: String,
+      enum: ['upload', 'link'],
+      default: 'upload',
+    },
     description: {
       type: String,
     },

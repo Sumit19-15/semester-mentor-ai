@@ -23,6 +23,11 @@ const resourceSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    uploadType: {
+      type: String,
+      enum: ['upload', 'link'],
+      default: 'link',
+    },
     type: {
       type: String,
       required: true,

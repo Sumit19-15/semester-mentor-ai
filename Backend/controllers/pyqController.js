@@ -1,11 +1,12 @@
 import Pyq from "../models/pyqModel.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 // @desc    Upload a new PYQ
 // @route   POST /api/pyqs
 // @access  Private
 export const createPyq = async (req, res) => {
   try {
-    const { subject, year } = req.body;
+    const { subject, year, title, uploadType, fileUrl: bodyFileUrl } = req.body;
 
     if (!subject || !year) {
       return res
@@ -13,16 +14,29 @@ export const createPyq = async (req, res) => {
         .json({ message: "Subject and Year are required." });
     }
 
-    if (!req.file) {
-      return res.status(400).json({ message: "Please upload a file" });
+    let finalFileUrl = bodyFileUrl;
+
+    if (uploadType === "upload" || !uploadType) {
+      if (!req.file) {
+        return res.status(400).json({ message: "Please upload a file" });
+      }
+      const uploadResponse = await uploadOnCloudinary(req.file.path);
+      if (!uploadResponse) {
+        return res.status(500).json({ message: "Failed to upload file to Cloudinary" });
+      }
+      finalFileUrl = uploadResponse.secure_url;
     }
 
-    const fileUrl = `/${req.file.path}`;
+    if (!finalFileUrl) {
+       return res.status(400).json({ message: "Link or file is required" });
+    }
 
     const pyq = await Pyq.create({
       user: req.user._id,
       subject,
-      fileUrl,
+      title: title || `PYQ ${year}`,
+      fileUrl: finalFileUrl,
+      uploadType: uploadType || 'upload',
       year,
     });
 

@@ -12,6 +12,10 @@ const studyPlanSchema = mongoose.Schema(
       required: true,
       ref: "Subject",
     },
+    name: {
+      type: String,
+      default: "Study Plan",
+    },
     dailyHours: {
       type: Number,
       default: 4,
@@ -26,6 +30,13 @@ const studyPlanSchema = mongoose.Schema(
     planData: {
       type: mongoose.Schema.Types.Mixed, // Store the JSON response from AI
       required: true,
+    },
+    completedDays: [{
+      type: Number, // Store indexes of completed days
+    }],
+    isCompleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

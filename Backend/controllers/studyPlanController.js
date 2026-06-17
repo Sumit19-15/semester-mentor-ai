@@ -84,6 +84,7 @@ export const generateStudyPlan = async (req, res) => {
   try {
     const {
       subjectIds,
+      name,
       startDate,
       endDate,
       timeframe,
@@ -140,6 +141,7 @@ export const generateStudyPlan = async (req, res) => {
     // Save to Database
     const savedPlan = await StudyPlan.create({
       user: req.user._id,
+      name: name || "Study Plan",
       subject: normalizeSubjectIds(subjectIds)[0], // Assuming generating for one subject at a time
       dailyHours: availableHours,
       startDate: planStartDate,
@@ -197,7 +199,7 @@ export const getStudyPlans = async (req, res) => {
 // @access  Private
 export const generateStudyPlanFromSyllabus = async (req, res) => {
   try {
-    const { subjectName, courseCode, startDate, endDate, dailyStudyHours, goal } = req.body;
+    const { subjectName, courseCode, name, startDate, endDate, dailyStudyHours, goal } = req.body;
 
     if (!req.file) {
       return res.status(400).json({
@@ -283,3 +285,52 @@ export const generateStudyPlanFromSyllabus = async (req, res) => {
     });
   }
 };
+
+// @desc    Toggle completion of a specific day in the study plan
+// @route   PUT /api/study-plans/:planId/day/:dayIndex/toggle
+// @access  Private
+export const toggleDayCompletion = async (req, res) => {
+  try {
+    const { planId, dayIndex } = req.params;
+    const dayIdx = parseInt(dayIndex, 10);
+
+    const plan = await StudyPlan.findOne({ _id: planId, user: req.user._id });
+
+    if (!plan) {
+      return res.status(404).json({ message: "Study plan not found" });
+    }
+
+    const completedDays = plan.completedDays || [];
+    const indexInArray = completedDays.indexOf(dayIdx);
+
+    if (indexInArray > -1) {
+      // It's already completed, so un-complete it
+      completedDays.splice(indexInArray, 1);
+    } else {
+      // Mark as completed
+      completedDays.push(dayIdx);
+    }
+
+    // Check if all days are completed
+    let allCompleted = false;
+    const planData = plan.planData?.plan || plan.planData;
+    const totalDays = planData?.daily?.length || 0;
+
+    if (totalDays > 0 && completedDays.length === totalDays) {
+      allCompleted = true;
+    }
+
+    plan.completedDays = completedDays;
+    plan.isCompleted = allCompleted;
+
+    const updatedPlan = await plan.save();
+
+    res.status(200).json(updatedPlan);
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to toggle day completion",
+      error: error.message,
+    });
+  }
+};
+

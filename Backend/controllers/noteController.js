@@ -1,17 +1,29 @@
 import Note from "../models/noteModel.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 // @desc    Create a new note
 // @route   POST /api/notes
 // @access  Private
 export const createNote = async (req, res) => {
   try {
-    const { subject, topic, title, description } = req.body;
+    const { subject, topic, title, description, uploadType, fileUrl: bodyFileUrl } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ message: "Please upload a file" });
+    let finalFileUrl = bodyFileUrl;
+
+    if (uploadType === "upload" || !uploadType) { // default to upload if not provided
+      if (!req.file) {
+        return res.status(400).json({ message: "Please upload a file" });
+      }
+      const uploadResponse = await uploadOnCloudinary(req.file.path);
+      if (!uploadResponse) {
+        return res.status(500).json({ message: "Failed to upload file to Cloudinary" });
+      }
+      finalFileUrl = uploadResponse.secure_url;
     }
 
-    const fileUrl = `/${req.file.path}`;
+    if (!finalFileUrl) {
+       return res.status(400).json({ message: "Link or file is required" });
+    }
 
     const note = await Note.create({
       user: req.user._id,
@@ -19,7 +31,8 @@ export const createNote = async (req, res) => {
       topic,
       title,
       description,
-      fileUrl,
+      fileUrl: finalFileUrl,
+      uploadType: uploadType || 'upload'
     });
 
     res.status(201).json(note);
