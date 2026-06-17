@@ -99,7 +99,13 @@ export const sendMessage = async (req, res) => {
     ];
 
     // 3. Get AI Response
-    const aiResponse = await generateChatResponseWithAi({ messages: formattedMessages });
+    const abortController = new AbortController();
+    
+    req.on('close', () => {
+      abortController.abort();
+    });
+
+    const aiResponse = await generateChatResponseWithAi({ messages: formattedMessages, signal: abortController.signal });
 
     // 4. Save AI message
     const aiMessage = await ChatMessage.create({
@@ -117,6 +123,55 @@ export const sendMessage = async (req, res) => {
       aiMessage,
     });
   } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('Chat generation aborted by client');
+      return; // Do nothing if aborted
+    }
     res.status(500).json({ message: "Failed to process message", error: error.message });
+  }
+};
+
+// @desc    Delete a chat session and all its messages
+// @route   DELETE /api/chats/:id
+// @access  Private
+export const deleteChatSession = async (req, res) => {
+  try {
+    const chatSession = await ChatSession.findOne({ _id: req.params.id, user: req.user._id });
+    if (!chatSession) {
+      return res.status(404).json({ message: "Chat session not found" });
+    }
+
+    // Delete all messages in the session
+    await ChatMessage.deleteMany({ chatSession: chatSession._id });
+    
+    // Delete the session itself
+    await ChatSession.deleteOne({ _id: chatSession._id });
+
+    res.status(200).json({ message: "Chat session removed" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete chat session", error: error.message });
+  }
+};
+
+// @desc    Update a chat session (e.g. rename)
+// @route   PUT /api/chats/:id
+// @access  Private
+export const updateChatSession = async (req, res) => {
+  try {
+    const { title } = req.body;
+    
+    const chatSession = await ChatSession.findOne({ _id: req.params.id, user: req.user._id });
+    if (!chatSession) {
+      return res.status(404).json({ message: "Chat session not found" });
+    }
+
+    if (title) chatSession.title = title;
+    
+    chatSession.updatedAt = Date.now();
+    const updatedChat = await chatSession.save();
+
+    res.status(200).json(updatedChat);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update chat session", error: error.message });
   }
 };

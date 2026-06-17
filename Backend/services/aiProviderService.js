@@ -71,12 +71,12 @@ const isRetryableAiError = (error) => {
   return [429, 500, 502, 503, 504].includes(status);
 };
 
-const createChatCompletionWithRetry = async (client, request, attempts = 3) => {
+const createChatCompletionWithRetry = async (client, request, options = {}, attempts = 3) => {
   let lastError;
 
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      return await client.chat.completions.create(request);
+      return await client.chat.completions.create(request, options);
     } catch (error) {
       lastError = error;
 
@@ -134,7 +134,7 @@ export const generateStudyPlanWithAi = async ({
   };
 };
 
-export const generateChatResponseWithAi = async ({ messages }) => {
+export const generateChatResponseWithAi = async ({ messages, signal }) => {
   const config = getProviderConfig();
 
   const client = new OpenAI({
@@ -148,7 +148,9 @@ export const generateChatResponseWithAi = async ({ messages }) => {
     temperature: 0.7,
   };
 
-  const response = await createChatCompletionWithRetry(client, request);
+  const options = signal ? { signal } : {};
+
+  const response = await createChatCompletionWithRetry(client, request, options);
 
   return {
     provider: config.provider,
