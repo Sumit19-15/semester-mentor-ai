@@ -1,5 +1,6 @@
 import SideNavBar from '../components/SideNavBar';
 import { useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DashboardLayout({ children }) {
   const location = useLocation();
@@ -12,7 +13,18 @@ export default function DashboardLayout({ children }) {
       <SideNavBar />
       <main className={`md:ml-[240px] transition-all duration-300 ${isChatPage ? 'h-full flex flex-col' : 'p-stack_lg'}`}>
         <div className={`w-full ${isChatPage ? 'flex-1 h-full relative' : 'max-w-container_max_width mx-auto'}`}>
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>

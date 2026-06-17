@@ -32,7 +32,7 @@ export const useSubjectStore = create((set, get) => ({
 
   // Set active subject (which will be used to filter views in the workspace)
   setActiveSubject: (subject) => {
-    set({ activeSubject: subject, activeTopic: null });
+    set({ activeSubject: subject, activeTopic: null, activeStudyPlan: null });
   },
 
   // Set active topic (useful for AiModuleChatPage tracking)
@@ -133,6 +133,19 @@ export const useSubjectStore = create((set, get) => ({
 
   setActiveStudyPlan: (plan) => {
     set({ activeStudyPlan: plan });
+  },
+
+  toggleStudyPlanDay: async (planId, dayIndex) => {
+    try {
+      const response = await api.put(`/study-plans/${planId}/day/${dayIndex}/toggle`);
+      set((state) => ({
+        activeStudyPlan: response.data,
+        studyPlans: state.studyPlans.map(p => p._id === planId ? response.data : p)
+      }));
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
 
   createTopic: async (topicData) => {

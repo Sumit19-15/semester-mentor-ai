@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Calendar, Clock, CheckCircle2, Target, BookOpen, AlertCircle, Sparkles, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, Target, BookOpen, AlertCircle, Sparkles, ChevronRight, ChevronDown } from 'lucide-react';
 import { useSubjectStore } from '../store/useSubjectStore';
+import { motion, AnimatePresence } from 'framer-motion';
 import GeneratePlanModal from './GeneratePlanModal';
 
 export default function SubjectStudyPlanTab() {
-  const { activeStudyPlan, studyPlans, setActiveStudyPlan, activeSubject } = useSubjectStore();
+  const { activeStudyPlan, studyPlans, setActiveStudyPlan, activeSubject, toggleStudyPlanDay } = useSubjectStore();
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
 
   const renderEmptyState = () => (
@@ -42,23 +43,27 @@ export default function SubjectStudyPlanTab() {
             {studyPlans.map(plan => (
               <button 
                 key={plan._id}
-                onClick={() => setActiveStudyPlan(plan)}
+                onClick={() => setActiveStudyPlan(activeStudyPlan?._id === plan._id ? null : plan)}
                 className={`flex items-center justify-between p-4 rounded-xl border transition-all text-left group ${activeStudyPlan?._id === plan._id ? 'border-primary bg-primary-container/10 ring-1 ring-primary/20' : 'border-outline-variant hover:border-primary/50 bg-surface'}`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${activeStudyPlan?._id === plan._id ? 'bg-primary text-on-primary' : 'bg-surface-container text-secondary group-hover:text-primary transition-colors'}`}>
-                    <Calendar className="w-5 h-5" />
+                    {plan.isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
                   </div>
                   <div>
                     <h4 className={`font-label-md text-[14px] font-bold ${activeStudyPlan?._id === plan._id ? 'text-primary' : 'text-on-surface'}`}>
-                      {new Date(plan.startDate).toLocaleDateString()}
+                      {plan.name || "Study Plan"}
                     </h4>
                     <p className="font-label-sm text-[11px] text-secondary mt-0.5">
-                      {plan.dailyHours} hours/day
+                      {new Date(plan.startDate).toLocaleDateString()} • {plan.dailyHours} hrs/day
                     </p>
                   </div>
                 </div>
-                <ChevronRight className={`w-5 h-5 transition-colors ${activeStudyPlan?._id === plan._id ? 'text-primary' : 'text-outline group-hover:text-primary'}`} />
+                {activeStudyPlan?._id === plan._id ? (
+                  <ChevronDown className="w-5 h-5 transition-colors text-primary" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 transition-colors text-outline group-hover:text-primary" />
+                )}
               </button>
             ))}
           </div>
@@ -130,7 +135,7 @@ export default function SubjectStudyPlanTab() {
                 <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow hover:border-primary/30">
                   <div className="flex justify-between items-start mb-3">
                     <span className="font-label-md text-primary font-bold">{day.date}</span>
-                    <span className="bg-secondary-container/30 text-secondary-fixed-dim px-2 py-0.5 rounded font-label-sm text-[10px] uppercase font-bold tracking-wider flex items-center gap-1">
+                    <span className="bg-secondary-container/30 text-on-surface px-2 py-0.5 rounded font-label-sm text-[10px] uppercase font-bold tracking-wider flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {day.durationHours} hrs
                     </span>
                   </div>
@@ -155,13 +160,28 @@ export default function SubjectStudyPlanTab() {
                   </ul>
 
                   {day.revision && (
-                    <div className="bg-primary-container/20 border-l-2 border-primary p-2.5 rounded-r-lg">
+                    <div className="bg-primary-container/20 border-l-2 border-primary p-2.5 rounded-r-lg mb-4">
                       <p className="font-label-sm font-bold text-primary mb-0.5 flex items-center gap-1">
                         <BookOpen className="w-3.5 h-3.5" /> Revision
                       </p>
                       <p className="font-body-sm text-[12px] text-on-surface-variant leading-tight">{day.revision}</p>
                     </div>
                   )}
+
+                  <div className="flex items-center justify-between border-t border-outline-variant pt-3 mt-auto">
+                    <label 
+                      className="flex items-center gap-2 font-label-sm text-[12px] font-semibold text-on-surface cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input 
+                        type="checkbox" 
+                        checked={activeStudyPlan.completedDays?.includes(idx) || false}
+                        onChange={() => toggleStudyPlanDay(activeStudyPlan._id, idx)}
+                        className="w-4 h-4 rounded text-primary focus:ring-primary cursor-pointer border-outline-variant"
+                      />
+                      Mark Day Complete
+                    </label>
+                  </div>
                 </div>
               </div>
             ))}

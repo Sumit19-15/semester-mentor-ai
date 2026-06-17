@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FileText, Link as LinkIcon, MoreVertical, Upload } from 'lucide-react';
+import { FileText, Link as LinkIcon, Download, ExternalLink, Upload } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSubjectStore } from '../store/useSubjectStore';
 import UploadFileModal from './UploadFileModal';
 
@@ -33,22 +34,29 @@ export default function SubjectResourcesTab() {
             </tr>
           </thead>
           <tbody className="font-body-md text-[14px]">
+            <AnimatePresence>
             {resources?.length > 0 ? resources.map((resource, idx) => (
-              <tr key={resource._id || idx} className="border-b border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer">
+              <motion.tr 
+                key={resource._id || idx} 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="border-b border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer"
+              >
                 <td className="py-3 px-4">
                   {resource.type === 'pdf' ? <FileText className="w-5 h-5 text-[#d32f2f]" /> : <LinkIcon className="w-5 h-5 text-[#1976d2]" />}
                 </td>
                 <td className="py-3 px-4 font-medium text-on-surface group-hover:text-primary transition-colors">
-                  <a href={resource.link || '#'} target="_blank" rel="noreferrer" className="block w-full">{resource.title}</a>
+                  <span className="block w-full">{resource.title}</span>
                 </td>
                 <td className="py-3 px-4 text-secondary capitalize">{resource.type}</td>
                 <td className="py-3 px-4 text-secondary">{new Date(resource.createdAt).toLocaleDateString()}</td>
                 <td className="py-3 px-4 text-right">
-                  <button className="text-secondary opacity-0 group-hover:opacity-100 hover:text-primary transition-all p-1">
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
+                  <a href={resource.link || '#'} target="_blank" rel="noreferrer" className="inline-flex text-secondary opacity-0 group-hover:opacity-100 hover:text-primary transition-all p-2 rounded-lg hover:bg-primary-container/20">
+                    {resource.uploadType === 'upload' ? <Download className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
+                  </a>
                 </td>
-              </tr>
+              </motion.tr>
             )) : (
               <tr>
                 <td colSpan="5" className="py-8 text-center text-secondary">
@@ -56,6 +64,7 @@ export default function SubjectResourcesTab() {
                 </td>
               </tr>
             )}
+            </AnimatePresence>
           </tbody>
         </table>
       </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Search, FileText, Eye, Download, Upload } from 'lucide-react';
+import { Search, FileText, ExternalLink, Download, Upload } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSubjectStore } from '../store/useSubjectStore';
 import UploadFileModal from './UploadFileModal';
 
@@ -24,36 +25,39 @@ export default function SubjectPyqsTab() {
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
         {/* List */}
         <div className="divide-y divide-outline-variant">
-
+          <AnimatePresence>
           {pyqs?.length > 0 ? pyqs.map((pyq, idx) => (
-            <div key={pyq._id || idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 hover:bg-surface-container transition-colors group cursor-pointer gap-4">
+            <motion.div 
+              key={pyq._id || idx} 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 hover:bg-surface-container transition-colors group gap-4"
+            >
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div className="w-10 h-10 shrink-0 rounded bg-primary-container/20 border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary-container/40 transition-colors">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-headline-sm text-[16px] font-bold text-on-surface group-hover:text-primary transition-colors truncate">{pyq.year} - {pyq.subject?.name || 'PYQ'}</h3>
+                  <h3 className="font-headline-sm text-[16px] font-bold text-on-surface truncate">{pyq.title || `PYQ ${pyq.year}`}</h3>
                   <div className="flex flex-wrap items-center gap-2 mt-1">
                     <span className="font-label-sm text-[10px] uppercase font-bold text-secondary bg-surface-variant px-2 py-0.5 rounded tracking-wide">{pyq.year}</span>
                     <span className="font-body-md text-[12px] text-secondary truncate">Added on {new Date(pyq.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity ml-14 sm:ml-0">
-                <a href={pyq.fileUrl || '#'} target="_blank" rel="noreferrer" className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" title="View">
-                  <Eye className="w-5 h-5" />
-                </a>
-                <a href={pyq.fileUrl || '#'} download className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" title="Download">
-                  <Download className="w-5 h-5" />
+              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-14 sm:ml-0 focus-within:opacity-100">
+                <a href={pyq.fileUrl || '#'} target="_blank" rel="noreferrer" className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" title={pyq.uploadType === 'upload' ? 'Download' : 'Open Link'}>
+                  {pyq.uploadType === 'upload' ? <Download className="w-5 h-5" /> : <ExternalLink className="w-5 h-5" />}
                 </a>
               </div>
-            </div>
+            </motion.div>
           )) : (
             <div className="p-8 text-center text-secondary">
               No PYQs found for this subject. Upload one above!
             </div>
           )}
-
+          </AnimatePresence>
         </div>
       </div>
 

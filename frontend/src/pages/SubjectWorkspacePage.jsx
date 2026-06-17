@@ -11,12 +11,15 @@ import AddSubjectModal from '../components/AddSubjectModal';
 import GeneratePlanModal from '../components/GeneratePlanModal';
 import { useSubjectStore } from '../store/useSubjectStore';
 import api from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function SubjectWorkspacePage() {
   const [activeTab, setActiveTab] = useState('Topics');
   const [isParsing, setIsParsing] = useState(false);
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
   const [isGeneratePlanModalOpen, setIsGeneratePlanModalOpen] = useState(false);
+  const [isReuploadModalOpen, setIsReuploadModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
   
   const { 
@@ -68,25 +71,22 @@ export default function SubjectWorkspacePage() {
     if (!file) return;
 
     if (activeSubject.topics && activeSubject.topics.length > 0) {
-      const confirmReupload = window.confirm(
-        "Re-uploading will delete all existing topics. Prefer adding topics manually. Are you sure you want to proceed?"
-      );
-      if (!confirmReupload) {
-        e.target.value = null;
-        return;
-      }
-      try {
-        await useSubjectStore.getState().deleteAllTopicsForSubject(activeSubject._id);
-      } catch (error) {
-        console.error("Failed to delete existing topics", error);
-        toast.error("Failed to delete existing topics.");
-        e.target.value = null;
-        return;
-      }
+      setSelectedFile(file);
+      setIsReuploadModalOpen(true);
+      e.target.value = null;
+      return;
     }
 
+    await processSyllabusFile(file);
+    e.target.value = null; // Reset input
+  };
+
+  const processSyllabusFile = async (file) => {
     setIsParsing(true);
     try {
+      if (activeSubject.topics && activeSubject.topics.length > 0) {
+        await useSubjectStore.getState().deleteAllTopicsForSubject(activeSubject._id);
+      }
       const formData = new FormData();
       formData.append("file", file);
       
@@ -94,7 +94,6 @@ export default function SubjectWorkspacePage() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      // Refresh topics
       if (fetchTopicsForSubject) {
         await fetchTopicsForSubject(activeSubject._id);
       }
@@ -105,7 +104,6 @@ export default function SubjectWorkspacePage() {
       toast.error("Failed to parse topics from syllabus.");
     } finally {
       setIsParsing(false);
-      e.target.value = null; // Reset input
     }
   };
 
@@ -226,15 +224,56 @@ export default function SubjectWorkspacePage() {
             </div>
 
             {/* Render Active Tab Content */}
-            {activeTab === 'Topics' && <SubjectOverviewTab setActiveTab={setActiveTab} />}
-            {activeTab === 'Study Plan' && <SubjectStudyPlanTab />}
-            {activeTab === 'Notes' && <SubjectNotesTab />}
-            {activeTab === 'Resources' && <SubjectResourcesTab />}
-            {activeTab === 'PYQs' && <SubjectPyqsTab />}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === 'Topics' && <SubjectOverviewTab setActiveTab={setActiveTab} />}
+                {activeTab === 'Study Plan' && <SubjectStudyPlanTab />}
+                {activeTab === 'Notes' && <SubjectNotesTab />}
+                {activeTab === 'Resources' && <SubjectResourcesTab />}
+                {activeTab === 'PYQs' && <SubjectPyqsTab />}
+              </motion.div>
+            </AnimatePresence>
 
           </div>
         </main>
       </div>
+
+      {isReuploadModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-surface rounded-xl shadow-lg w-full max-w-md overflow-hidden flex flex-col border border-outline-variant p-5">
+            <h2 className="font-headline-sm text-lg font-bold text-error mb-2">Warning: Re-upload Syllabus</h2>
+            <p className="font-body-md text-on-surface mb-6">
+              Re-uploading will delete all your existing topics. It's usually better to add missing topics manually. Are you absolutely sure you want to proceed?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => {
+                  setIsReuploadModalOpen(false);
+                  setSelectedFile(null);
+                }}
+                className="px-4 py-2 rounded-lg font-label-md font-semibold text-secondary hover:bg-surface-container"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  setIsReuploadModalOpen(false);
+                  if (selectedFile) await processSyllabusFile(selectedFile);
+                }}
+                className="px-5 py-2 bg-error text-onError rounded-lg font-label-md font-semibold hover:opacity-90"
+              >
+                Yes, Delete and Re-upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AddSubjectModal 
         isOpen={isAddSubjectModalOpen} 

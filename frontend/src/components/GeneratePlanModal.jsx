@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../services/api';
 import { useSubjectStore } from '../store/useSubjectStore';
 
 export default function GeneratePlanModal({ isOpen, onClose, subjectId }) {
+  const [name, setName] = useState('');
   const [dailyStudyHours, setDailyStudyHours] = useState(4);
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState('');
@@ -18,6 +20,7 @@ export default function GeneratePlanModal({ isOpen, onClose, subjectId }) {
     try {
       const response = await api.post('/study-plans/generate', {
         subjectIds: [subjectId],
+        name: name || 'Study Plan',
         startDate,
         endDate,
         dailyStudyHours: Number(dailyStudyHours)
@@ -30,7 +33,7 @@ export default function GeneratePlanModal({ isOpen, onClose, subjectId }) {
       onClose(newPlan);
     } catch (error) {
       console.error("Failed to generate plan", error);
-      alert(error.response?.data?.message || "Failed to generate study plan");
+      toast.error(error.response?.data?.message || "Failed to generate study plan");
     } finally {
       setIsSubmitting(false);
     }
@@ -49,6 +52,16 @@ export default function GeneratePlanModal({ isOpen, onClose, subjectId }) {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="font-label-md text-[14px] font-semibold text-on-surface">Plan Name</label>
+            <input 
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Finals Prep Plan"
+              className="w-full bg-surface-container-lowest border border-surface-variant rounded-lg px-4 py-2.5 font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+            />
+          </div>
           <div className="flex flex-col gap-1.5">
             <label className="font-label-md text-[14px] font-semibold text-on-surface">Daily Study Hours</label>
             <input 

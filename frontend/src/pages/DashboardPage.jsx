@@ -4,6 +4,7 @@ import { useSubjectStore } from '../store/useSubjectStore';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { FileText, Plus, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import AddSubjectModal from '../components/AddSubjectModal';
 
 export default function DashboardPage() {
@@ -25,22 +26,54 @@ export default function DashboardPage() {
     year: 'numeric'
   });
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  const getMotivation = () => {
+    const quotes = [
+      "Here is your academic overview for today.",
+      "Ready to conquer your goals today?",
+      "Every small step brings you closer to success.",
+      "Focus, learn, and grow. Let's get started!",
+      "Knowledge is power. Let's gain some today."
+    ];
+    return quotes[Math.floor(Math.random() * quotes.length)];
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  };
+
   return (
     <DashboardLayout>
+      <motion.div initial="hidden" animate="visible" variants={containerVariants}>
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-stack_lg gap-4">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:justify-between md:items-end mb-stack_lg gap-4">
         <div>
-          <h2 className="font-display-lg text-display-lg text-on-surface mb-1">Good morning, {userName}</h2>
-          <p className="font-body-md text-body-md text-secondary">Here is your academic overview for today.</p>
+          <h2 className="font-display-lg text-display-lg text-on-surface mb-1">{getGreeting()}, {userName}</h2>
+          <p className="font-body-md text-body-md text-secondary">{getMotivation()}</p>
         </div>
         <div className="font-body-md text-body-md text-secondary flex items-center gap-2">
           <Calendar className="w-4 h-4" />
           {today}
         </div>
-      </div>
+      </motion.div>
 
       {/* Section 1: My Subjects */}
-      <section className="mb-stack_lg">
+      <motion.section variants={itemVariants} className="mb-stack_lg">
         <div className="flex justify-between items-center mb-stack_md">
           <h3 className="font-headline-sm text-headline-sm text-on-surface">My Subjects</h3>
           <div className="flex gap-4 items-center">
@@ -89,10 +122,10 @@ export default function DashboardPage() {
             No subjects found. Let's add some to your workspace!
           </div>
         )}
-      </section>
+      </motion.section>
 
       {/* Section 2: Modules */}
-      <section>
+      <motion.section variants={itemVariants}>
         <div className="flex justify-between items-center mb-stack_md">
           <h3 className="font-headline-sm text-headline-sm text-on-surface">Modules</h3>
         </div>
@@ -119,7 +152,8 @@ export default function DashboardPage() {
           )}
 
         </div>
-      </section>
+      </motion.section>
+      </motion.div>
 
       {/* Add Subject Modal */}
       <AddSubjectModal 
