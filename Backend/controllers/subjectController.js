@@ -5,7 +5,7 @@ import Subject from "../models/subjectModel.js";
 // @access  Private (Requires JWT)
 export const createSubject = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, courseCode } = req.body;
 
     if (!name) {
       return res
@@ -16,6 +16,7 @@ export const createSubject = async (req, res) => {
     const subject = await Subject.create({
       user: req.user._id,
       name,
+      courseCode,
     });
 
     res.status(201).json(subject);

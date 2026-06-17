@@ -119,6 +119,13 @@ export const updateUserProfile = async (req, res) => {
       user.subjects = req.body.subjects || user.subjects;
 
       if (req.body.password) {
+        if (!req.body.oldPassword) {
+          return res.status(400).json({ message: "Old password is required to set a new password." });
+        }
+        const isMatch = await user.matchPassword(req.body.oldPassword);
+        if (!isMatch) {
+          return res.status(400).json({ message: "Incorrect old password." });
+        }
         user.password = req.body.password;
       }
 

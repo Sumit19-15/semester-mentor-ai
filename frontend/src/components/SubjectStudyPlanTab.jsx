@@ -251,7 +251,8 @@ export default function SubjectStudyPlanTab() {
             ))}
           </div>
         </div>
-      </motion.div>
+      </div>
+    </motion.div>
   );
 })()}
 
