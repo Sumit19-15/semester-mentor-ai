@@ -105,7 +105,7 @@ export default function MentorChatPage() {
         <div className="p-4 border-b border-outline-variant/50 shrink-0">
           <button 
             onClick={handleNewChat}
-            className="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-md text-[14px] py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors duration-150 shadow-sm font-semibold"
+            className="w-full bg-primary hover:opacity-90 text-on-primary font-label-md text-[14px] py-2.5 rounded-lg flex items-center justify-center gap-2 transition-opacity duration-150 shadow-sm font-semibold"
           >
             <Plus className="w-4 h-4" />
             New Chat

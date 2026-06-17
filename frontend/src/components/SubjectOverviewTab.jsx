@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { CheckCircle2, Play, Lock, FileText, ExternalLink, List, FileQuestion, ChevronRight, BookOpen, Clock, Plus, Trash2 } from 'lucide-react';
 import { useSubjectStore } from '../store/useSubjectStore';
 import AddTopicModal from './AddTopicModal';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
+import toast from 'react-hot-toast';
 
 export default function SubjectOverviewTab({ setActiveTab }) {
   const { topics, notes, resources, pyqs, activeSubject, deleteTopic, completeTopic } = useSubjectStore();
   const [isAddTopicModalOpen, setIsAddTopicModalOpen] = useState(false);
+  const [topicToDelete, setTopicToDelete] = useState(null);
 
   const completedTopics = topics?.filter(t => t.completed).length || 0;
   const totalTopics = topics?.length || 1;
@@ -16,10 +19,18 @@ export default function SubjectOverviewTab({ setActiveTab }) {
   const sortedNotes = [...(notes || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const sortedPyqs = [...(pyqs || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  const handleDelete = async (e, topicId) => {
+  const handleDeleteClick = (e, topic) => {
     e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this topic?")) {
-      await deleteTopic(topicId, activeSubject._id);
+    setTopicToDelete(topic);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!topicToDelete) return;
+    try {
+      await deleteTopic(topicToDelete._id, activeSubject._id);
+      toast.success('Topic deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete topic');
     }
   };
 
@@ -73,7 +84,7 @@ export default function SubjectOverviewTab({ setActiveTab }) {
                       <span className="bg-surface-container text-secondary px-2 py-1 rounded font-label-sm text-[10px] font-bold uppercase tracking-wider">In Progress</span>
                     )}
                     <button 
-                      onClick={(e) => handleDelete(e, topic._id)}
+                      onClick={(e) => handleDeleteClick(e, topic)}
                       className="text-secondary hover:text-error transition-colors p-1"
                       title="Delete Topic"
                     >
@@ -86,7 +97,7 @@ export default function SubjectOverviewTab({ setActiveTab }) {
                 <div className="flex items-center justify-between border-t border-outline-variant pt-3 mt-auto">
                   <div className="flex items-center gap-2 font-label-sm text-[12px] font-semibold text-secondary">
                     {topic.completed ? <CheckCircle2 className="w-4 h-4 text-[#2e7d32]" /> : <Clock className="w-4 h-4" />}
-                    {topic.completed ? 'Finished' : 'Topic Status'}
+                    {topic.completed ? 'Finished' : 'Pending'}
                   </div>
                   <label 
                     className="flex items-center gap-2 font-label-sm text-[12px] font-semibold text-on-surface cursor-pointer"
@@ -193,6 +204,13 @@ export default function SubjectOverviewTab({ setActiveTab }) {
         isOpen={isAddTopicModalOpen} 
         onClose={() => setIsAddTopicModalOpen(false)} 
         subjectId={activeSubject?._id}
+      />
+      <ConfirmDeleteModal 
+        isOpen={!!topicToDelete}
+        onClose={() => setTopicToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Topic"
+        message={`Are you sure you want to delete "${topicToDelete?.title}"?`}
       />
     </div>
   );

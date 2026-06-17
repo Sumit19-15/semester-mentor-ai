@@ -158,7 +158,7 @@ export default function SubjectWorkspacePage() {
               >
                 <div className="flex flex-col gap-0.5 overflow-hidden">
                   <span className={`font-label-md text-[14px] font-semibold truncate transition-colors ${activeSubject._id === sub._id ? 'text-primary' : 'text-on-surface group-hover:text-primary'}`}>{sub.name}</span>
-                  <span className="font-label-sm text-[10px] text-on-surface-variant truncate">{sub.courseCode || 'Course'}</span>
+                  {sub.courseCode && <span className="font-label-sm text-[10px] text-on-surface-variant truncate">{sub.courseCode}</span>}
                 </div>
               </button>
             ))}
@@ -166,13 +166,23 @@ export default function SubjectWorkspacePage() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 h-full flex flex-col bg-background relative overflow-y-auto custom-scrollbar">
-          <div className="p-stack_lg max-w-container_max_width mx-auto w-full">
+        <main className="flex-1 h-full flex flex-col bg-background relative overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={activeSubject._id}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="p-stack_lg max-w-container_max_width mx-auto w-full h-full overflow-y-auto custom-scrollbar"
+            >
             {/* Page Header */}
             <div className="mb-8" data-purpose="workspace-header">
-              <div className="flex items-center font-label-sm text-[12px] text-secondary uppercase tracking-widest mb-3 font-semibold">
-                <span>{activeSubject.courseCode || 'Course'}</span>
-              </div>
+              {activeSubject.courseCode && (
+                <div className="flex items-center font-label-sm text-[12px] text-secondary uppercase tracking-widest mb-3 font-semibold">
+                  <span>{activeSubject.courseCode}</span>
+                </div>
+              )}
               <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
                 <h1 className="font-display-lg text-[32px] font-bold text-on-surface tracking-tight max-w-2xl leading-tight">
                   {activeSubject.name}
@@ -240,7 +250,8 @@ export default function SubjectWorkspacePage() {
               </motion.div>
             </AnimatePresence>
 
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 

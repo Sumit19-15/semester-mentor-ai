@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { useSubjectStore } from '../store/useSubjectStore';
+import toast from 'react-hot-toast';
 
 export default function AddSubjectModal({ isOpen, onClose }) {
   const [name, setName] = useState('');
@@ -17,11 +18,13 @@ export default function AddSubjectModal({ isOpen, onClose }) {
     setIsSubmitting(true);
     try {
       await createSubject({ name, courseCode });
+      toast.success('Subject added successfully!');
       setName('');
       setCourseCode('');
       onClose();
     } catch (error) {
       console.error("Failed to create subject", error);
+      toast.error('Failed to add subject');
     } finally {
       setIsSubmitting(false);
     }

@@ -102,7 +102,11 @@ export default function DashboardPage() {
                 <div key={sub._id} className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px]" onClick={() => { setActiveSubject(sub); navigate('/subjects'); }}>
                   <div className="flex justify-between items-start mb-4">
                     <h4 className="font-headline-sm text-headline-sm text-on-surface leading-tight">{sub.name}</h4>
-                    <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ml-2">{sub.courseCode || 'Course'}</span>
+                    {sub.courseCode && (
+                      <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ml-2">
+                        {sub.courseCode}
+                      </span>
+                    )}
                   </div>
                   <div className="mt-auto pt-4">
                     <div className="flex justify-between items-center mb-1">

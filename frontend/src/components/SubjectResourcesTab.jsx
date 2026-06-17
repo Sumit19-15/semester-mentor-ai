@@ -1,12 +1,23 @@
 import { useState } from 'react';
-import { FileText, Link as LinkIcon, Download, ExternalLink, Upload } from 'lucide-react';
+import { FileText, Link as LinkIcon, Download, ExternalLink, Upload, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSubjectStore } from '../store/useSubjectStore';
 import UploadFileModal from './UploadFileModal';
+import toast from 'react-hot-toast';
 
 export default function SubjectResourcesTab() {
-  const { resources, activeSubject } = useSubjectStore();
+  const { resources, activeSubject, deleteResource } = useSubjectStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+    try {
+      await deleteResource(id);
+      toast.success('Resource deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete resource');
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -30,7 +41,7 @@ export default function SubjectResourcesTab() {
               <th className="py-3 px-4 font-semibold">File Name</th>
               <th className="py-3 px-4 font-semibold w-32">Type</th>
               <th className="py-3 px-4 font-semibold w-40">Date Uploaded</th>
-              <th className="py-3 px-4 w-16"></th>
+              <th className="py-3 px-4 w-24"></th>
             </tr>
           </thead>
           <tbody className="font-body-md text-[14px]">
@@ -51,10 +62,13 @@ export default function SubjectResourcesTab() {
                 </td>
                 <td className="py-3 px-4 text-secondary capitalize">{resource.type}</td>
                 <td className="py-3 px-4 text-secondary">{new Date(resource.createdAt).toLocaleDateString()}</td>
-                <td className="py-3 px-4 text-right">
+                <td className="py-3 px-4 text-right flex justify-end gap-1">
                   <a href={resource.link || '#'} target="_blank" rel="noreferrer" className="inline-flex text-secondary opacity-0 group-hover:opacity-100 hover:text-primary transition-all p-2 rounded-lg hover:bg-primary-container/20">
                     {resource.uploadType === 'upload' ? <Download className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
                   </a>
+                  <button onClick={(e) => handleDelete(e, resource._id)} className="inline-flex text-secondary opacity-0 group-hover:opacity-100 hover:text-error transition-all p-2 rounded-lg hover:bg-error/10">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </td>
               </motion.tr>
             )) : (

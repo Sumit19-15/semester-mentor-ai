@@ -110,7 +110,7 @@ export default function AiModuleChatPage() {
             <button 
               onClick={handleNewConversation}
               disabled={!activeTopic}
-              className="w-full bg-primary hover:bg-primary/90 text-on-primary disabled:opacity-50 font-label-md text-[14px] py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors duration-150 shadow-sm font-semibold mt-1"
+              className="w-full bg-primary hover:opacity-90 text-on-primary disabled:opacity-50 font-label-md text-[14px] py-2.5 rounded-lg flex items-center justify-center gap-2 transition-opacity duration-150 shadow-sm font-semibold mt-1"
             >
               <Plus className="w-4 h-4" />
               New Conversation

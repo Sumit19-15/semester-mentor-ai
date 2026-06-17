@@ -78,9 +78,16 @@ export default function SubjectStudyPlanTab() {
         const summary = plan?.summary || "Study Plan";
         const dailyPlans = plan?.daily || [];
         const weeklyPlans = plan?.weekly || [];
+        const completedDaysCount = activeStudyPlan.completedDays?.length || 0;
+        const totalDays = dailyPlans.length || 1;
+        const progressPercent = Math.round((completedDaysCount / totalDays) * 100);
 
         return (
-          <div className="flex flex-col gap-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col gap-8"
+          >
             {/* Header Info */}
       <div className="bg-gradient-to-br from-primary-container/40 to-surface-container-lowest rounded-2xl border border-primary/20 p-6 sm:p-8 shadow-sm">
         <div className="flex items-start justify-between gap-4 flex-col sm:flex-row mb-4">
@@ -93,13 +100,33 @@ export default function SubjectStudyPlanTab() {
               {summary}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2 shrink-0 bg-surface-container-lowest p-3 rounded-xl border border-outline-variant shadow-sm">
-            <div className="flex items-center gap-2 font-label-sm text-[12px] font-bold uppercase tracking-wider text-secondary">
-              <Calendar className="w-4 h-4" />
-              Timeframe
+          <div className="flex flex-col items-center gap-2 shrink-0 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm w-full sm:w-auto">
+            <div className="relative w-16 h-16 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path
+                  className="text-surface-variant stroke-current"
+                  strokeWidth="3"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <motion.path
+                  className="text-primary stroke-current"
+                  strokeWidth="3"
+                  strokeDasharray={`${progressPercent}, 100`}
+                  fill="none"
+                  initial={{ strokeDasharray: "0, 100" }}
+                  animate={{ strokeDasharray: `${progressPercent}, 100` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+              </svg>
+              <span className="absolute font-bold text-[12px] text-on-surface">{progressPercent}%</span>
             </div>
-            <div className="font-label-md text-on-surface font-semibold">
-              {new Date(startDate).toLocaleDateString()} - {new Date(endDate || startDate).toLocaleDateString()}
+            <div className="flex flex-col items-center">
+              <span className="font-label-sm text-[10px] text-secondary uppercase tracking-wider font-bold">Progress</span>
+              <span className="font-label-md text-[12px] font-semibold text-on-surface">
+                {completedDaysCount} / {totalDays} Days
+              </span>
             </div>
           </div>
         </div>
@@ -128,7 +155,13 @@ export default function SubjectStudyPlanTab() {
           
           <div className="flex flex-col gap-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-outline-variant before:to-transparent">
             {dailyPlans.map((day, idx) => (
-              <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+              <motion.div 
+                key={idx} 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
+              >
                 <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-surface bg-primary-container text-primary font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
                   {idx + 1}
                 </div>
@@ -183,7 +216,7 @@ export default function SubjectStudyPlanTab() {
                     </label>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -218,8 +251,7 @@ export default function SubjectStudyPlanTab() {
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
   );
 })()}
 

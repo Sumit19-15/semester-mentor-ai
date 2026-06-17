@@ -1,12 +1,23 @@
 import { useState } from 'react';
-import { Search, FileText, ExternalLink, Download, Upload } from 'lucide-react';
+import { Search, FileText, ExternalLink, Download, Upload, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSubjectStore } from '../store/useSubjectStore';
 import UploadFileModal from './UploadFileModal';
+import toast from 'react-hot-toast';
 
 export default function SubjectPyqsTab() {
-  const { pyqs, activeSubject } = useSubjectStore();
+  const { pyqs, activeSubject, deletePyq } = useSubjectStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+    try {
+      await deletePyq(id);
+      toast.success('PYQ deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete PYQ');
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -50,6 +61,9 @@ export default function SubjectPyqsTab() {
                 <a href={pyq.fileUrl || '#'} target="_blank" rel="noreferrer" className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" title={pyq.uploadType === 'upload' ? 'Download' : 'Open Link'}>
                   {pyq.uploadType === 'upload' ? <Download className="w-5 h-5" /> : <ExternalLink className="w-5 h-5" />}
                 </a>
+                <button onClick={(e) => handleDelete(e, pyq._id)} className="p-2 text-secondary hover:text-error hover:bg-error/10 rounded-lg transition-colors block" title="Delete PYQ">
+                  <Trash2 className="w-5 h-5" />
+                </button>
               </div>
             </motion.div>
           )) : (

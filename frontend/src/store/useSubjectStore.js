@@ -203,5 +203,38 @@ export const useSubjectStore = create((set, get) => ({
     } catch (error) {
       throw error;
     }
+  },
+
+  deleteResource: async (resourceId) => {
+    try {
+      await api.delete(`/resources/${resourceId}`);
+      set((state) => ({
+        resources: state.resources.filter(r => r._id !== resourceId)
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deleteNote: async (noteId) => {
+    try {
+      await api.delete(`/notes/${noteId}`);
+      set((state) => ({
+        notes: state.notes.filter(n => n._id !== noteId)
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deletePyq: async (pyqId) => {
+    try {
+      await api.delete(`/pyqs/${pyqId}`);
+      set((state) => ({
+        pyqs: state.pyqs.filter(p => p._id !== pyqId)
+      }));
+    } catch (error) {
+      throw error;
+    }
   }
 }));

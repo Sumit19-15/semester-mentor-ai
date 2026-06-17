@@ -1,12 +1,23 @@
 import { useState } from 'react';
-import { Search, Plus, FileText, Download, ExternalLink } from 'lucide-react';
+import { Search, Plus, FileText, Download, ExternalLink, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSubjectStore } from '../store/useSubjectStore';
 import UploadFileModal from './UploadFileModal';
+import toast from 'react-hot-toast';
 
 export default function SubjectNotesTab() {
-  const { notes, activeSubject } = useSubjectStore();
+  const { notes, activeSubject, deleteNote } = useSubjectStore();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+    try {
+      await deleteNote(id);
+      toast.success('Note deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete note');
+    }
+  };
 
   return (
     <div>
@@ -52,6 +63,9 @@ export default function SubjectNotesTab() {
                   <a href={note.fileUrl || '#'} target="_blank" rel="noreferrer" className="p-2 text-secondary hover:text-primary hover:bg-primary-container/20 rounded-lg transition-colors block" title={note.uploadType === 'upload' ? "Download" : "Open Link"}>
                     {note.uploadType === 'upload' ? <Download className="w-5 h-5" /> : <ExternalLink className="w-5 h-5" />}
                   </a>
+                  <button onClick={(e) => handleDelete(e, note._id)} className="p-2 text-secondary hover:text-error hover:bg-error/10 rounded-lg transition-colors block" title="Delete Note">
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
             </motion.div>
