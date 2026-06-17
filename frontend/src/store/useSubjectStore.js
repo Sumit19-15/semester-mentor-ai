@@ -63,14 +63,22 @@ export const useSubjectStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await api.get(`/topics?subject=${subjectId}`);
-      // Update the subject's topics in the array and the topics state
-      set((state) => ({
-        topics: response.data,
-        subjects: state.subjects.map(sub => 
+      // Update the subject's topics in the array, activeSubject, and topics state
+      set((state) => {
+        const updatedSubjects = state.subjects.map(sub => 
           sub._id === subjectId ? { ...sub, topics: response.data } : sub
-        ),
-        isLoading: false
-      }));
+        );
+        const updatedActiveSubject = state.activeSubject?._id === subjectId
+          ? { ...state.activeSubject, topics: response.data }
+          : state.activeSubject;
+          
+        return {
+          topics: response.data,
+          subjects: updatedSubjects,
+          activeSubject: updatedActiveSubject,
+          isLoading: false
+        };
+      });
     } catch (error) {
       set({ error: error.response?.data?.message || 'Failed to fetch topics', isLoading: false });
     }

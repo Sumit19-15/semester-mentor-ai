@@ -20,22 +20,41 @@ export default function SubjectNotesTab() {
     if (e) e.preventDefault();
     setDownloadingId(note._id);
     try {
-      const url = note.fileUrl || note.link;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Network error');
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      const ext = url.split('.').pop() || 'pdf';
-      link.download = `${note.title || 'Note'}.${ext}`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
+      let url = note.fileUrl || note.link;
+      
+      // If it's a Cloudinary URL, inject fl_attachment to force download via browser
+      if (url.includes('cloudinary.com')) {
+        const uploadIndex = url.indexOf('/upload/');
+        if (uploadIndex !== -1 && !url.includes('fl_attachment')) {
+          url = url.slice(0, uploadIndex + 8) + 'fl_attachment/' + url.slice(uploadIndex + 8);
+        }
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.download = note.title || 'download';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        
+        // Slight delay to show loader
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } else {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network error');
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        const ext = url.split('.').pop() || 'pdf';
+        link.download = `${note.title || 'Note'}.${ext}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(blobUrl);
+      }
     } catch (error) {
       console.error('Download failed', error);
-      // Fallback
       window.open(note.fileUrl || note.link, '_blank');
     } finally {
       setDownloadingId(null);
@@ -74,7 +93,7 @@ export default function SubjectNotesTab() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              onClick={() => handleDownload(null, note)}
+              onClick={() => window.open(note.fileUrl || note.link, '_blank')}
               className="p-4 hover:bg-surface-container-low transition-colors duration-150 group flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-start gap-4 flex-1">

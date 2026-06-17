@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Folder, Plus, Share2, MoreVertical, BrainCircuit, Copy, ThumbsUp, Paperclip, Library, ArrowUp, ChevronDown, ChevronRight } from 'lucide-react';
+import { Folder, Plus, Share2, MoreVertical, BrainCircuit, Copy, ThumbsUp, Paperclip, Library, ArrowUp, ChevronDown, ChevronRight, Trash2, Square, Loader2, Edit2, Check, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { useSubjectStore } from '../store/useSubjectStore';
 import { useChatStore } from '../store/useChatStore';
@@ -10,16 +10,22 @@ export default function AiModuleChatPage() {
     sessions, 
     activeSession, 
     activeMessages, 
-    isSending, 
+    isSending,
+    isLoading,
     fetchSessions, 
     createSession, 
     setActiveSession, 
-    sendMessage 
+    sendMessage,
+    deleteSession,
+    cancelGeneration,
+    renameSession
   } = useChatStore();
 
   const [expandedTopicId, setExpandedTopicId] = useState(null);
   const [activeTopic, setActiveTopic] = useState(null);
   const [inputText, setInputText] = useState('');
+  const [editingSessionId, setEditingSessionId] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
 
   // Fetch subjects if none exist
   useEffect(() => {
@@ -72,6 +78,43 @@ export default function AiModuleChatPage() {
       await sendMessage(text);
     } else {
       await sendMessage(text);
+    }
+  };
+
+  const handleDeleteChat = async (e, sessionId) => {
+    e.stopPropagation();
+    try {
+      await deleteSession(sessionId);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEditClick = (e, session) => {
+    e.stopPropagation();
+    setEditingSessionId(session._id);
+    setEditTitle(session.title);
+  };
+
+  const handleRenameSubmit = async (e, sessionId) => {
+    if (e) e.stopPropagation();
+    if (!editTitle.trim()) {
+      setEditingSessionId(null);
+      return;
+    }
+    try {
+      await renameSession(sessionId, editTitle);
+      setEditingSessionId(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleRenameKeyDown = (e, sessionId) => {
+    if (e.key === 'Enter') {
+      handleRenameSubmit(e, sessionId);
+    } else if (e.key === 'Escape') {
+      setEditingSessionId(null);
     }
   };
 
@@ -143,14 +186,55 @@ export default function AiModuleChatPage() {
                         <span className="text-[11px] text-secondary px-2">No chats yet</span>
                       ) : (
                         sessions.map((session) => (
-                          <button
+                          <div
                             key={session._id}
-                            onClick={() => handleChatClick(session)}
-                            className={`w-full text-left p-2.5 rounded-lg border flex flex-col gap-1 hover:bg-surface-container transition-colors group ${activeSession?._id === session._id ? 'bg-surface-variant border-outline-variant/50' : 'border-transparent'}`}
+                            onClick={() => {
+                              if (editingSessionId !== session._id) handleChatClick(session);
+                            }}
+                            className={`w-full text-left p-2.5 rounded-lg border flex items-center justify-between group cursor-pointer transition-colors ${activeSession?._id === session._id ? 'bg-surface-variant border-outline-variant/50' : 'border-transparent hover:bg-surface-container'}`}
                           >
-                            <span className="font-label-md text-[13px] text-on-surface font-medium truncate group-hover:text-primary transition-colors">{session.title}</span>
-                            <span className="font-label-sm text-[10px] text-on-surface-variant">{new Date(session.updatedAt).toLocaleDateString()}</span>
-                          </button>
+                            {editingSessionId === session._id ? (
+                              <div className="flex items-center gap-1 w-full" onClick={(e) => e.stopPropagation()}>
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  value={editTitle}
+                                  onChange={(e) => setEditTitle(e.target.value)}
+                                  onKeyDown={(e) => handleRenameKeyDown(e, session._id)}
+                                  className="w-full bg-surface border border-primary rounded px-2 py-1 text-[13px] font-label-md text-on-surface focus:outline-none"
+                                />
+                                <button onClick={(e) => handleRenameSubmit(e, session._id)} className="p-1 text-primary hover:bg-primary-container rounded">
+                                  <Check className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => setEditingSessionId(null)} className="p-1 text-secondary hover:bg-surface-container-high rounded">
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex flex-col gap-1 overflow-hidden">
+                                  <span className="font-label-md text-[13px] text-on-surface font-medium truncate group-hover:text-primary transition-colors">{session.title}</span>
+                                  <span className="font-label-sm text-[10px] text-on-surface-variant">{new Date(session.updatedAt).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    onClick={(e) => handleEditClick(e, session)}
+                                    className="p-1 text-secondary hover:text-primary rounded hover:bg-primary-container/30"
+                                    title="Rename chat"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => handleDeleteChat(e, session._id)}
+                                    className="p-1 text-secondary hover:text-error rounded hover:bg-error/10"
+                                    title="Delete chat"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
                         ))
                       )}
                     </div>
@@ -182,51 +266,69 @@ export default function AiModuleChatPage() {
           </header>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar pt-[72px] pb-[160px] px-6">
-            {!activeSession || activeMessages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full max-w-[600px] mx-auto text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary-container flex items-center justify-center mb-stack_md shadow-sm border border-outline-variant/30">
-                  <BrainCircuit className="text-[32px] w-8 h-8 text-on-primary-container" />
-                </div>
-                <h2 className="font-display-lg text-[24px] font-bold text-on-surface mb-2">Module Mentor</h2>
-                <p className="font-body-lg text-[16px] text-secondary mb-8">
-                  I'm your dedicated AI tutor for the {activeSubject.name} course. Ask me anything about {activeTopic ? activeTopic.title : 'this module'}.
-                </p>
-                {activeTopic && (
-                  <div className="flex gap-2">
-                     <button onClick={() => setInputText(`Can you explain the core concepts of ${activeTopic.title}?`)} className="bg-surface-container-lowest border border-outline-variant text-secondary font-label-sm text-[12px] font-semibold px-4 py-1.5 rounded-full hover:bg-surface-variant hover:text-on-surface transition-colors shadow-sm">
-                        Explain core concepts
-                     </button>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSession?._id || 'empty'}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="h-full"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="max-w-[720px] mx-auto w-full flex flex-col gap-8">
-                {activeMessages.map((msg) => (
-                  <div key={msg._id} className={`flex ${msg.role === 'user' ? 'flex-col gap-1 self-end max-w-[85%]' : 'gap-4 self-start max-w-[90%]'}`}>
-                    {msg.role === 'ai' && (
-                      <div className="w-8 h-8 rounded-lg bg-primary-container/30 text-primary flex items-center justify-center shrink-0 mt-1 border border-primary/20">
-                        <BrainCircuit className="w-5 h-5" />
+                ) : !activeSession || activeMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full max-w-[600px] mx-auto text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-primary-container flex items-center justify-center mb-stack_md shadow-sm border border-outline-variant/30">
+                      <BrainCircuit className="text-[32px] w-8 h-8 text-on-primary-container" />
+                    </div>
+                    <h2 className="font-display-lg text-[24px] font-bold text-on-surface mb-2">Module Mentor</h2>
+                    <p className="font-body-lg text-[16px] text-secondary mb-8">
+                      I'm your dedicated AI tutor for the {activeSubject.name} course. Ask me anything about {activeTopic ? activeTopic.title : 'this module'}.
+                    </p>
+                    {activeTopic && (
+                      <div className="flex gap-2">
+                        <button onClick={() => setInputText(`Can you explain the core concepts of ${activeTopic.title}?`)} className="bg-surface-container-lowest border border-outline-variant text-secondary font-label-sm text-[12px] font-semibold px-4 py-1.5 rounded-full hover:bg-surface-variant hover:text-on-surface transition-colors shadow-sm">
+                            Explain core concepts
+                        </button>
                       </div>
                     )}
-                    <div className={`p-4 rounded-xl shadow-sm ${msg.role === 'user' ? 'bg-surface-container text-on-surface rounded-tr-sm border border-outline-variant/20' : 'bg-surface-container-lowest border border-outline-variant text-on-surface rounded-tl-sm w-full'}`}>
-                      <p className="font-body-md text-[14px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                    </div>
                   </div>
-                ))}
+                ) : (
+                  <div className="max-w-[800px] mx-auto w-full flex flex-col gap-6 pt-4">
+                    {activeMessages.map((msg) => (
+                      <div key={msg._id} className={`flex ${msg.role === 'user' ? 'flex-col gap-1 self-end max-w-[85%]' : 'gap-5 self-start w-full'}`}>
+                        {msg.role === 'ai' && (
+                          <div className="w-9 h-9 rounded-full bg-primary-container/50 text-primary flex items-center justify-center shrink-0 mt-0.5 border border-primary/20">
+                            <BrainCircuit className="w-5 h-5" />
+                          </div>
+                        )}
+                        <div className={`rounded-2xl ${msg.role === 'user' ? 'bg-surface-variant text-on-surface px-5 py-3 ml-auto' : 'bg-transparent text-on-surface pt-1.5 w-full max-w-[calc(100%-3rem)]'}`}>
+                          <p className={`font-body-md text-[15px] leading-relaxed whitespace-pre-wrap ${msg.role === 'ai' ? 'text-on-surface' : 'text-on-surface-variant'}`}>{msg.content}</p>
+                        </div>
+                      </div>
+                    ))}
 
-                {isSending && (
-                  <div className="flex gap-4 self-start max-w-[90%]">
-                    <div className="w-8 h-8 rounded-lg bg-primary-container/30 text-primary flex items-center justify-center shrink-0 mt-1 border border-primary/20">
-                      <BrainCircuit className="w-5 h-5" />
-                    </div>
-                    <div className="bg-surface-container-lowest border border-outline-variant text-on-surface p-4 rounded-xl rounded-tl-sm shadow-sm flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                      <p className="font-body-md text-[14px] text-secondary">Analyzing context...</p>
-                    </div>
+                    {isSending && (
+                      <div className="flex gap-5 self-start w-full">
+                        <div className="w-9 h-9 rounded-full bg-primary-container/50 text-primary flex items-center justify-center shrink-0 mt-0.5 border border-primary/20">
+                          <BrainCircuit className="w-5 h-5" />
+                        </div>
+                        <div className="pt-1.5 flex flex-col gap-2">
+                          <div className="flex gap-1.5 items-center mt-2">
+                            <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                            <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                            <div className="w-2 h-2 rounded-full bg-primary/80 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Chat Input Area */}
@@ -252,13 +354,23 @@ export default function AiModuleChatPage() {
                         <Library className="w-5 h-5" />
                       </button>
                     </div>
-                    <button 
-                      onClick={handleSend}
-                      disabled={isSending || !inputText.trim()}
-                      className="w-8 h-8 rounded-lg bg-primary disabled:opacity-50 text-on-primary flex items-center justify-center hover:bg-primary/90 transition-colors shadow-sm"
-                    >
-                      <ArrowUp className="w-5 h-5" />
-                    </button>
+                    {isSending ? (
+                      <button 
+                        onClick={cancelGeneration}
+                        className="w-8 h-8 rounded-lg bg-surface-variant text-on-surface-variant flex items-center justify-center hover:bg-surface-container-high transition-colors shadow-sm"
+                        title="Stop Generating"
+                      >
+                        <Square className="w-3.5 h-3.5 fill-current" />
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={handleSend}
+                        disabled={!inputText.trim()}
+                        className="w-8 h-8 rounded-lg bg-primary disabled:opacity-50 text-on-primary flex items-center justify-center hover:bg-primary/90 transition-colors shadow-sm"
+                      >
+                        <ArrowUp className="w-5 h-5" />
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="text-center mt-2">

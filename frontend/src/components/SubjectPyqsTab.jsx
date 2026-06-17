@@ -20,19 +20,37 @@ export default function SubjectPyqsTab() {
     if (e) e.preventDefault();
     setDownloadingId(pyq._id);
     try {
-      const url = pyq.fileUrl || pyq.link;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Network error');
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      const ext = url.split('.').pop() || 'pdf';
-      link.download = `${pyq.title || `PYQ_${pyq.year}`}.${ext}`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
+      let url = pyq.fileUrl || pyq.link;
+      
+      if (url.includes('cloudinary.com')) {
+        const uploadIndex = url.indexOf('/upload/');
+        if (uploadIndex !== -1 && !url.includes('fl_attachment')) {
+          url = url.slice(0, uploadIndex + 8) + 'fl_attachment/' + url.slice(uploadIndex + 8);
+        }
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.download = pyq.title || `PYQ_${pyq.year}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } else {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network error');
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        const ext = url.split('.').pop() || 'pdf';
+        link.download = `${pyq.title || `PYQ_${pyq.year}`}.${ext}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(blobUrl);
+      }
     } catch (error) {
       console.error('Download failed', error);
       window.open(pyq.fileUrl || pyq.link, '_blank');
@@ -75,7 +93,7 @@ export default function SubjectPyqsTab() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              onClick={() => handleDownload(null, pyq)}
+              onClick={() => window.open(pyq.fileUrl || pyq.link, '_blank')}
               className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 hover:bg-surface-container transition-colors group gap-4 cursor-pointer"
             >
               <div className="flex items-center gap-4 w-full sm:w-auto">

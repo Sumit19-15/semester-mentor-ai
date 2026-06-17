@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import axios from 'axios';
 import api from '../services/api';
 
 export const useChatStore = create((set, get) => ({
@@ -8,6 +9,7 @@ export const useChatStore = create((set, get) => ({
   isLoading: false,
   isSending: false,
   error: null,
+  abortController: null,
 
   // Fetch chat sessions (can be filtered by type, subject, topic)
   fetchSessions: async (filters = {}) => {
@@ -60,6 +62,35 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  // Delete a chat session
+  deleteSession: async (sessionId) => {
+    try {
+      await api.delete(`/chats/${sessionId}`);
+      set((state) => ({
+        sessions: state.sessions.filter(s => s._id !== sessionId),
+        activeSession: state.activeSession?._id === sessionId ? null : state.activeSession,
+        activeMessages: state.activeSession?._id === sessionId ? [] : state.activeMessages
+      }));
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to delete session' });
+      throw error;
+    }
+  },
+
+  // Rename a chat session
+  renameSession: async (sessionId, newTitle) => {
+    try {
+      const response = await api.put(`/chats/${sessionId}`, { title: newTitle });
+      set((state) => ({
+        sessions: state.sessions.map(s => s._id === sessionId ? response.data : s),
+        activeSession: state.activeSession?._id === sessionId ? response.data : state.activeSession
+      }));
+    } catch (error) {
+      set({ error: error.response?.data?.message || 'Failed to rename session' });
+      throw error;
+    }
+  },
+
   // Send a message in the active session
   sendMessage: async (content) => {
     const { activeSession, activeMessages } = get();
@@ -68,29 +99,53 @@ export const useChatStore = create((set, get) => ({
     // Optimistically add user message
     const tempId = Date.now().toString();
     const optimisticUserMsg = { _id: tempId, role: 'user', content, createdAt: new Date().toISOString() };
+    const controller = new AbortController();
     
     set({ 
       activeMessages: [...activeMessages, optimisticUserMsg],
       isSending: true,
-      error: null
+      error: null,
+      abortController: controller
     });
 
     try {
-      const response = await api.post(`/chats/${activeSession._id}/message`, { content });
+      const response = await api.post(`/chats/${activeSession._id}/message`, { content }, {
+        signal: controller.signal
+      });
       
       // response.data contains { userMessage, aiMessage }
       // Replace optimistic message and append AI message
       set((state) => ({
         activeMessages: state.activeMessages.map(msg => msg._id === tempId ? response.data.userMessage : msg).concat(response.data.aiMessage),
-        isSending: false
+        isSending: false,
+        abortController: null
       }));
     } catch (error) {
+      if (axios.isCancel(error) || error.name === 'CanceledError' || error.code === 'ERR_CANCELED' || error.message === 'canceled') {
+        // Request was cancelled by the user. Remove the optimistic message.
+        set((state) => ({ 
+          activeMessages: state.activeMessages.filter(msg => msg._id !== tempId),
+          isSending: false,
+          abortController: null 
+        }));
+        return;
+      }
+      
       // Remove optimistic message on failure
       set((state) => ({ 
         activeMessages: state.activeMessages.filter(msg => msg._id !== tempId),
         error: error.response?.data?.message || 'Failed to send message', 
-        isSending: false 
+        isSending: false,
+        abortController: null 
       }));
+    }
+  },
+
+  // Cancel ongoing AI generation
+  cancelGeneration: () => {
+    const { abortController } = get();
+    if (abortController) {
+      abortController.abort();
     }
   }
 }));

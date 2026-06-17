@@ -84,7 +84,7 @@ export default function SubjectResourcesTab() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                onClick={() => handleDownload(null, resource)}
+                onClick={() => window.open(resource.fileUrl || resource.link, '_blank')}
                 className="border-b border-outline-variant hover:bg-surface-container transition-colors group cursor-pointer"
               >
                 <td className="py-3 px-4">
