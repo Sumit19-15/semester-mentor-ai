@@ -14,6 +14,8 @@ import SettingsPage from './pages/SettingsPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import { useAuthStore } from './store/authStore';
 
+import { Agentation } from 'agentation';
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
   if (!isAuthenticated) {
@@ -43,7 +45,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<OnboardingPage />} />
-        
+
         {/* Protected Dashboard routes */}
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/subjects" element={<ProtectedRoute><SubjectWorkspacePage /></ProtectedRoute>} />
@@ -57,6 +59,10 @@ function App() {
           </ProtectedRoute>
         } />
       </Routes>
+
+      {import.meta.env.DEV && (
+        <Agentation endpoint="http://localhost:4747" />
+      )}
     </Router>
   );
 }

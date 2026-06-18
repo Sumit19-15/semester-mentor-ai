@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GraduationCap, Clock, FileText, Paperclip, ArrowUp, Plus, BrainCircuit, Trash2, Square, Loader2, Edit2, Check, X, Folder, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '../store/useChatStore';
 import { useStudyPlanStore } from '../store/useStudyPlanStore';
 import { useSubjectStore } from '../store/useSubjectStore';
+import TypewriterText from '../components/TypewriterText';
 
 export default function MentorChatPage() {
   const [inputText, setInputText] = useState('');
@@ -12,6 +13,7 @@ export default function MentorChatPage() {
     activeSession, 
     activeMessages, 
     isSending, 
+    error,
     fetchSessions, 
     createSession, 
     setActiveSession, 
@@ -28,8 +30,14 @@ export default function MentorChatPage() {
   const { subjects, fetchSubjects } = useSubjectStore();
   const [selectedSubject, setSelectedSubject] = useState(null);
 
+  const messagesEndRef = useRef(null);
+
   useEffect(() => {
-    fetchSessions({ type: 'GLOBAL' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [activeMessages, isSending]);
+
+  useEffect(() => {
+    fetchSessions();
     if (subjects.length === 0) fetchSubjects();
     // Reset active session when unmounting or entering this page initially
     setActiveSession(null);
@@ -57,37 +65,29 @@ export default function MentorChatPage() {
   };
 
   const handleGeneratePlan = async () => {
+    if (!selectedSubject) {
+      alert("Please select a specific Subject from the sidebar first to generate its study plan.");
+      return;
+    }
+
     try {
-      const subjectIds = subjects.map(s => s._id);
+      const subjectIds = [selectedSubject._id];
       
       // We will first send a message as the user to show the prompt in chat
-      const promptText = "Create a study schedule for finals week based on my subjects.";
+      const promptText = `Create a study schedule for finals week based on ${selectedSubject.name}.`;
       
       if (!activeSession) {
         await createSession({
           title: "Study Schedule Planning",
-          type: 'GLOBAL'
+          type: 'SUBJECT',
+          subjectId: selectedSubject._id
         });
       }
       
-      // We optimistically send user message, but instead of normal AI chat, we generate plan
       await sendMessage(promptText);
       
-      // Then we call the study plan generation API
-      // Since it takes time, let's just let the normal AI provider handle it?
-      // Wait, the requirement says "Bind Quick Start buttons to /api/study-plans/generate".
-      // Let's actually call generatePlan.
       const planData = await generatePlan({ subjectIds });
       
-      // We could format the plan Data and send it back to the chat as an AI message.
-      // But since the API returns JSON, let's just stringify it or format it nicely as a message.
-      const formattedPlan = `Here is your study plan:\n\n${JSON.stringify(planData, null, 2)}`;
-      
-      // Wait, there's no way to inject an AI message directly via chatStore unless we just add it to state or hit a specialized endpoint.
-      // Since we already sent the prompt via \`sendMessage\`, the standard AI will respond to it.
-      // But the requirement says "Bind Quick Start buttons to /api/study-plans/generate".
-      // Maybe we can just alert it for now or dump it to console?
-      // No, let's just make the "Planning" button call the API, and dump it into an alert or a formatted markdown response for now to satisfy the binding.
       alert("Study plan generated! Check console for details.");
       console.log(planData);
       
@@ -188,7 +188,7 @@ export default function MentorChatPage() {
 
           <div className="px-3 py-2 font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider mt-2 mb-1 font-semibold">Your Conversations</div>
           
-          {sessions.map((session) => (
+          {sessions.filter(s => s.type === 'GLOBAL' || !s.subject).map((session) => (
             <div 
               key={session._id}
               onClick={() => {
@@ -272,7 +272,13 @@ export default function MentorChatPage() {
                         </div>
                       )}
                       <div className={`rounded-2xl ${msg.role === 'user' ? 'bg-surface-variant text-on-surface px-5 py-3 ml-auto' : 'bg-transparent text-on-surface pt-1.5 w-full max-w-[calc(100%-3rem)]'}`}>
-                        <p className={`font-body-md text-[15px] leading-relaxed whitespace-pre-wrap ${msg.role === 'ai' ? 'text-on-surface' : 'text-on-surface-variant'}`}>{msg.content}</p>
+                        <p className={`font-body-md text-[15px] leading-relaxed whitespace-pre-wrap ${msg.role === 'ai' ? 'text-on-surface' : 'text-on-surface-variant'}`}>
+                          {msg.role === 'ai' && msg.isNew ? (
+                            <TypewriterText text={msg.content} isNew={true} speed={15} />
+                          ) : (
+                            msg.content
+                          )}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -280,17 +286,24 @@ export default function MentorChatPage() {
                   {isSending && (
                     <div className="flex gap-5 self-start w-full">
                       <div className="w-9 h-9 rounded-full bg-primary-container/50 text-primary flex items-center justify-center shrink-0 mt-0.5 border border-primary/20">
-                        <BrainCircuit className="w-5 h-5" />
+                        <BrainCircuit className="w-5 h-5 animate-pulse" />
                       </div>
-                      <div className="pt-1.5 flex flex-col gap-2">
-                        <div className="flex gap-1.5 items-center mt-2">
-                          <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-2 h-2 rounded-full bg-primary/80 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      <div className="bg-transparent text-on-surface pt-1.5 w-full max-w-[calc(100%-3rem)]">
+                        <div className="flex gap-1.5 items-center mt-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
                       </div>
                     </div>
                   )}
+
+                  {error && (
+                    <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-xl text-[14px] font-medium flex items-center gap-2">
+                      <X className="w-4 h-4" /> {error}
+                    </div>
+                  )}
+
                   <div ref={messagesEndRef} className="h-4" />
                 </div>
               ) : selectedSubject ? (
@@ -310,14 +323,19 @@ export default function MentorChatPage() {
                       <Plus className="w-4 h-4 text-primary" /> Start a new discussion
                     </h3>
                     <div className="flex items-center gap-3 relative">
-                      <input 
-                        type="text"
+                      <textarea 
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={handleKeyDown}
+                        onInput={(e) => {
+                          e.target.style.height = 'auto';
+                          e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+                        }}
                         disabled={isSending}
                         placeholder={`Ask anything about ${selectedSubject.name}...`}
-                        className="flex-1 bg-surface border border-outline-variant rounded-xl px-4 py-3 text-[14px] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-secondary-fixed-dim pr-12"
+                        className="flex-1 bg-surface border border-outline-variant rounded-xl px-4 py-3 text-[14px] focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-secondary-fixed-dim pr-12 resize-none custom-scrollbar"
+                        rows={1}
+                        style={{ maxHeight: '200px' }}
                       />
                       <button 
                         onClick={() => handleSend()}
@@ -339,15 +357,59 @@ export default function MentorChatPage() {
                         onClick={() => {
                            setActiveSession(session);
                         }}
-                        className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all flex items-start gap-3 group"
+                        className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all flex items-start gap-3 group relative"
                       >
-                        <div className="mt-0.5 bg-surface-variant p-2 rounded-lg group-hover:bg-primary-container/50 transition-colors">
-                          <MessageSquare className="w-4 h-4 text-secondary group-hover:text-primary" />
-                        </div>
-                        <div>
-                           <div className="font-label-md text-[14px] font-medium text-on-surface line-clamp-2 leading-relaxed mb-1 group-hover:text-primary transition-colors">{session.title}</div>
-                           <div className="font-label-sm text-[11px] text-secondary">{new Date(session.updatedAt).toLocaleDateString()}</div>
-                        </div>
+                        {editingSessionId === session._id ? (
+                          <div className="flex items-start gap-2 w-full" onClick={(e) => e.stopPropagation()}>
+                            <div className="mt-0.5 bg-surface-variant p-2 rounded-lg shrink-0">
+                              <MessageSquare className="w-4 h-4 text-secondary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <input
+                                type="text"
+                                autoFocus
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                onKeyDown={(e) => handleRenameKeyDown(e, session._id)}
+                                className="w-full bg-surface border border-primary rounded px-2 py-1 text-[13px] font-label-md text-on-surface focus:outline-none mb-1"
+                              />
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                              <button onClick={(e) => handleRenameSubmit(e, session._id)} className="p-1 text-primary hover:bg-primary-container rounded">
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => setEditingSessionId(null)} className="p-1 text-secondary hover:bg-surface-container-high rounded">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="mt-0.5 bg-surface-variant p-2 rounded-lg group-hover:bg-primary-container/50 transition-colors shrink-0">
+                              <MessageSquare className="w-4 h-4 text-secondary group-hover:text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0 pr-10">
+                               <div className="font-label-md text-[14px] font-medium text-on-surface line-clamp-2 leading-relaxed mb-1 group-hover:text-primary transition-colors">{session.title}</div>
+                               <div className="font-label-sm text-[11px] text-secondary">{new Date(session.updatedAt).toLocaleDateString()}</div>
+                            </div>
+                            <div className="absolute top-3 right-3 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-container-lowest/80 pl-2 backdrop-blur-sm rounded-l">
+                              <button
+                                onClick={(e) => handleEditClick(e, session)}
+                                className="p-1.5 text-secondary hover:text-primary rounded hover:bg-primary-container/30 transition-colors"
+                                title="Rename chat"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => handleDeleteChat(e, session._id)}
+                                className="p-1.5 text-secondary hover:text-error rounded hover:bg-error/10 transition-colors"
+                                title="Delete chat"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     ))}
                     {sessions.filter(session => session.subject === selectedSubject._id).length === 0 && (
@@ -383,7 +445,7 @@ export default function MentorChatPage() {
                         </span>
                       </div>
                       <p className="font-body-md text-[14px] text-on-surface">
-                        Create a study schedule for finals week based on my subjects.
+                        Select a Subject from the sidebar and generate a detailed study schedule for it.
                       </p>
                     </button>
                     
@@ -417,14 +479,19 @@ export default function MentorChatPage() {
               <button className="text-secondary hover:text-on-surface p-1 transition-colors rounded-full hover:bg-surface-container">
                 <Paperclip className="w-5 h-5" />
               </button>
-              <input 
+              <textarea 
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onInput={(e) => {
+                  e.target.style.height = 'auto';
+                  e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+                }}
                 disabled={isSending}
-                className="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-body-md text-[14px] px-3 placeholder:text-secondary-fixed-dim outline-none" 
+                className="flex-1 bg-transparent border-none focus:ring-0 text-on-surface font-body-md text-[14px] px-3 py-1.5 placeholder:text-secondary-fixed-dim outline-none resize-none custom-scrollbar" 
                 placeholder={activeSession ? "Message Mentor..." : "Ask anything..."} 
-                type="text" 
+                rows={1}
+                style={{ maxHeight: '200px', minHeight: '32px' }}
               />
               {isSending ? (
                 <button 

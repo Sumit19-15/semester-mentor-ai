@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import { motion } from 'framer-motion';
 
 export default function LandingPage() {
   return (
-    <div className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="bg-surface text-on-surface font-body-md min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container"
+    >
       <main className="flex-grow pt-[120px] pb-stack_lg px-gutter max-w-container_max_width mx-auto w-full flex flex-col items-center justify-center">
         {/* Hero Section */}
         <section className="text-center w-full max-w-3xl flex flex-col items-center gap-stack_lg mb-[80px]">
@@ -109,6 +115,6 @@ export default function LandingPage() {
       </main>
 
       <Footer />
-    </div>
+    </motion.div>
   );
 }

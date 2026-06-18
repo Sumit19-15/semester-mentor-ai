@@ -52,8 +52,10 @@ export default function SettingsPage() {
     
     setIsSubmitting(true);
     try {
-      // Assuming the backend accepts password in the profile update endpoint
-      await api.put('/users/profile', { password: passwordData.newPassword });
+      await api.put('/users/profile', { 
+        password: passwordData.newPassword,
+        oldPassword: passwordData.currentPassword 
+      });
       toast.success('Password updated successfully!');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
@@ -168,6 +170,17 @@ export default function SettingsPage() {
               <div>
                 <h2 className="font-headline-sm text-[20px] font-bold text-on-surface mb-6">Change Password</h2>
                 <form onSubmit={handlePasswordUpdate} className="flex flex-col gap-5 max-w-md">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-[12px] font-semibold text-secondary uppercase tracking-wider">Current Password</label>
+                    <input 
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      className="bg-surface border border-outline-variant rounded-lg px-4 py-2.5 font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                      required
+                    />
+                  </div>
+
                   <div className="flex flex-col gap-1.5">
                     <label className="font-label-sm text-[12px] font-semibold text-secondary uppercase tracking-wider">New Password</label>
                     <input 

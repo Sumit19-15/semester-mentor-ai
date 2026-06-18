@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -34,7 +35,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-surface-container-low min-h-screen flex items-center justify-center p-gutter font-body-md text-on-surface transition-colors duration-300">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="bg-surface-container-low min-h-screen flex items-center justify-center p-gutter font-body-md text-on-surface transition-colors duration-300"
+    >
       <main className="w-full max-w-[440px]">
         {/* Brand Header Context */}
         <div className="text-center mb-stack_lg">
@@ -125,6 +131,6 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 }

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '../layouts/DashboardLayout';
 import { useSubjectStore } from '../store/useSubjectStore';
 import { useChatStore } from '../store/useChatStore';
+import TypewriterText from '../components/TypewriterText';
 
 export default function AiModuleChatPage() {
   const { activeSubject, subjects, fetchSubjects, fetchTopicsForSubject } = useSubjectStore();
@@ -306,7 +307,13 @@ export default function AiModuleChatPage() {
                           </div>
                         )}
                         <div className={`rounded-2xl ${msg.role === 'user' ? 'bg-surface-variant text-on-surface px-5 py-3 ml-auto' : 'bg-transparent text-on-surface pt-1.5 w-full max-w-[calc(100%-3rem)]'}`}>
-                          <p className={`font-body-md text-[15px] leading-relaxed whitespace-pre-wrap ${msg.role === 'ai' ? 'text-on-surface' : 'text-on-surface-variant'}`}>{msg.content}</p>
+                          <p className={`font-body-md text-[15px] leading-relaxed whitespace-pre-wrap ${msg.role === 'ai' ? 'text-on-surface' : 'text-on-surface-variant'}`}>
+                            {msg.role === 'ai' && msg.isNew ? (
+                              <TypewriterText text={msg.content} isNew={true} speed={15} />
+                            ) : (
+                              msg.content
+                            )}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -340,10 +347,15 @@ export default function AiModuleChatPage() {
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    onInput={(e) => {
+                      e.target.style.height = 'auto';
+                      e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+                    }}
                     disabled={isSending}
                     className="w-full bg-transparent border-none resize-none font-body-md text-[14px] text-on-surface placeholder:text-secondary focus:ring-0 px-4 py-4 max-h-[200px] overflow-y-auto custom-scrollbar"
                     placeholder="Message Semester Mentor..."
                     rows={1}
+                    style={{ minHeight: '52px' }}
                   ></textarea>
                   <div className="flex items-center justify-between px-3 py-2 border-t border-outline-variant/30 bg-surface">
                     <div className="flex items-center gap-1">

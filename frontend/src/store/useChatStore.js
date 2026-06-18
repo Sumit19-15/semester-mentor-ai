@@ -116,7 +116,7 @@ export const useChatStore = create((set, get) => ({
       // response.data contains { userMessage, aiMessage }
       // Replace optimistic message and append AI message
       set((state) => ({
-        activeMessages: state.activeMessages.map(msg => msg._id === tempId ? response.data.userMessage : msg).concat(response.data.aiMessage),
+        activeMessages: state.activeMessages.map(msg => msg._id === tempId ? response.data.userMessage : msg).concat({ ...response.data.aiMessage, isNew: true }),
         isSending: false,
         abortController: null
       }));

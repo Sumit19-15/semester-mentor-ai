@@ -40,9 +40,10 @@ export default function GeneratePlanModal({ isOpen, onClose, subjectId }) {
       
       await fetchStudyPlansForSubject(subjectId);
       // Try to find the new plan to set as active
-      const newPlan = response.data;
+      const state = useSubjectStore.getState();
+      const newPlan = state.studyPlans.find(p => p._id === response.data._id);
       // We will handle navigation/setting active tab in the parent component via onClose
-      onClose(newPlan);
+      onClose(newPlan || response.data);
     } catch (error) {
       console.error("Failed to generate plan", error);
       toast.error(error.response?.data?.message || "Failed to generate study plan");

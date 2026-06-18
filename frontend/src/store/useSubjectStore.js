@@ -201,12 +201,20 @@ export const useSubjectStore = create((set, get) => ({
   deleteTopic: async (topicId, subjectId) => {
     try {
       await api.delete(`/topics/${topicId}`);
-      set((state) => ({
-        topics: state.topics.filter(t => t._id !== topicId),
-        subjects: state.subjects.map(sub => 
+      set((state) => {
+        const updatedSubjects = state.subjects.map(sub => 
           sub._id === subjectId ? { ...sub, topics: sub.topics.filter(t => t._id !== topicId) } : sub
-        )
-      }));
+        );
+        const updatedActiveSubject = state.activeSubject?._id === subjectId
+          ? { ...state.activeSubject, topics: state.activeSubject.topics?.filter(t => t._id !== topicId) || [] }
+          : state.activeSubject;
+
+        return {
+          topics: state.topics.filter(t => t._id !== topicId),
+          subjects: updatedSubjects,
+          activeSubject: updatedActiveSubject
+        };
+      });
     } catch (error) {
       throw error;
     }

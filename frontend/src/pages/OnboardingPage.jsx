@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Upload, FileText, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
+import { motion } from 'framer-motion';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -81,7 +82,12 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-gutter bg-surface-bright transition-colors duration-300">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen flex items-center justify-center p-gutter bg-surface-bright transition-colors duration-300"
+    >
       {/* Main Registration Container */}
       <div className="w-full max-w-md bg-surface-container-lowest rounded-lg border border-surface-container-highest shadow-[0px_2px_4px_rgba(0,0,0,0.04)] overflow-hidden">
         
@@ -261,7 +267,7 @@ export default function OnboardingPage() {
             {/* Action Area */}
             <div className="mt-stack_lg flex items-center justify-between pt-stack_sm border-t border-surface-container-highest">
               {step === 1 ? (
-                <Link className="font-label-md text-label-md text-secondary hover:text-on-surface transition-colors duration-150" to="/login">Log in instead</Link>
+                <Link className="font-label-md text-[14px] font-semibold text-secondary hover:text-on-surface bg-surface hover:bg-surface-container border border-outline-variant px-4 py-2 rounded-lg transition-colors duration-150 shadow-sm" to="/login">Log in instead</Link>
               ) : (
                 <button 
                   type="button"
@@ -287,6 +293,6 @@ export default function OnboardingPage() {
           </form>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
