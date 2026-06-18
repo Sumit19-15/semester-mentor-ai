@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import fs from "fs";
+import fs from "fs/promises";
 
 const ai = new GoogleGenAI({});
 
@@ -31,10 +31,18 @@ const generateContentWithRetry = async (request, attempts = 3) => {
 export const parseTopicsFromSyllabusFile = async ({ filePath, mimeType }) => {
   const filePart = {
     inlineData: {
-      data: fs.readFileSync(filePath).toString("base64"),
+      data: (await fs.readFile(filePath)).toString("base64"),
       mimeType,
     },
   };
+
+  // Step 1: OCR Extraction
+  const extractionPrompt = "Extract and clean all the raw text from this syllabus document exactly as written, preserving structure, headings, and lists.";
+  const extractionResponse = await generateContentWithRetry({
+    model: "gemini-2.5-flash",
+    contents: [filePart, extractionPrompt],
+  });
+  const extractedText = extractionResponse.text;
 
   const prompt = `
 You are a university syllabus parser.
@@ -117,7 +125,7 @@ Return only valid JSON.
 
   const response = await generateContentWithRetry({
     model: "gemini-2.5-flash",
-    contents: [filePart, prompt],
+    contents: [extractedText, prompt],
     config: {
       responseMimeType: "application/json",
       responseSchema: {

@@ -1,8 +1,5 @@
 import { generateStudyPlanWithAi } from "../services/aiProviderService.js";
-import { parseTopicsFromSyllabusFile } from "../services/syllabusParserService.js";
 import { buildStudyPlanContext } from "../services/studyPlanContextService.js";
-import fs from "fs";
-
 const buildSystemPrompt = () => `
 You are Semester Mentor AI, an academic planning assistant.
 Create practical study plans from the student's stored syllabus.
@@ -99,6 +96,12 @@ export const generateStudyPlan = async (req, res) => {
     const availableHours =
       dailyStudyHours || req.user.dailyFreeHours || timeframe?.dailyStudyHours || 4;
 
+    if (!subjectIds || (Array.isArray(subjectIds) && subjectIds.length === 0)) {
+      return res.status(400).json({
+        message: "A valid Subject ID is required to generate a study plan.",
+      });
+    }
+
     if (!planStartDate || !planEndDate) {
       return res.status(400).json({
         message: "Please provide startDate and endDate for the study plan.",
@@ -115,7 +118,7 @@ export const generateStudyPlan = async (req, res) => {
     if (context.subjects.length === 0) {
       return res.status(404).json({
         message:
-          "No syllabus subjects found. Parse or create subjects/topics before generating a plan.",
+          "Subject not found in the database. Please select a valid Subject.",
       });
     }
 
@@ -196,97 +199,6 @@ export const getStudyPlans = async (req, res) => {
   }
 };
 
-// @desc    Upload a syllabus file, parse it, and generate a study plan
-// @route   POST /api/study-plans/generate-from-syllabus
-// @access  Private
-export const generateStudyPlanFromSyllabus = async (req, res) => {
-  try {
-    const { subjectName, courseCode, name, startDate, endDate, dailyStudyHours, goal } = req.body;
-
-    if (!req.file) {
-      return res.status(400).json({
-        message: "Please upload a syllabus image or PDF.",
-      });
-    }
-
-    if (!startDate || !endDate) {
-      return res.status(400).json({
-        message: "Please provide startDate and endDate for the study plan.",
-      });
-    }
-
-    // calling fun and getting all topics from the uplaoded syallbus
-    const topicsArray = await parseTopicsFromSyllabusFile({
-      filePath: req.file.path,
-      mimeType: req.file.mimetype,
-    });
-
-    const subject = {
-      id: "uploaded-syllabus",
-      name: subjectName || "Uploaded Syllabus",
-      courseCode: courseCode || "",
-      topics: topicsArray.map((topic) => ({
-        title: topic.title,
-        completed: false,
-      })),
-    };
-
-    const preferences = {
-      student: {
-        id: req.user._id,
-        name: req.user.name,
-        semester: req.user.semester,
-        branch: req.user.branch,
-        dailyFreeHours: req.user.dailyFreeHours,
-      },
-      planRequest: {
-        startDate,
-        endDate,
-        dailyStudyHours: dailyStudyHours || req.user.dailyFreeHours || 2,
-        goal: goal || "Complete the syllabus with regular revision.",
-      },
-    };
-
-    const aiResponse = await generateStudyPlanWithAi({
-      systemPrompt: buildSystemPrompt(),
-      userPrompt: buildUserPrompt({
-        context: {
-          subjects: [subject],
-          notes: [],
-          pyqs: [],
-          resources: [],
-        },
-        preferences,
-      }),
-    });
-
-    fs.unlinkSync(req.file.path);
-
-    res.status(200).json({
-      message: "Syllabus parsed and study plan generated successfully.",
-      provider: aiResponse.provider,
-      model: aiResponse.model,
-      parsedTopics: topicsArray,
-      contextSummary: {
-        subjects: 1,
-        topics: topicsArray.length,
-        notes: 0,
-        pyqs: 0,
-        resources: 0,
-      },
-      plan: aiResponse.result,
-    });
-  } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
-    res.status(500).json({
-      message: "Syllabus-to-plan generation failed",
-      error: error.message,
-    });
-  }
-};
 
 // @desc    Toggle completion of a specific day in the study plan
 // @route   PUT /api/study-plans/:planId/day/:dayIndex/toggle

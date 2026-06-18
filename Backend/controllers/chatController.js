@@ -1,5 +1,7 @@
 import ChatSession from "../models/chatSessionModel.js";
 import ChatMessage from "../models/chatMessageModel.js";
+import Subject from "../models/subjectModel.js";
+import Topic from "../models/topicModel.js";
 import { generateChatResponseWithAi } from "../services/aiProviderService.js";
 
 // @desc    Get all chat sessions for a user (can filter by type, subject, topic)
@@ -92,18 +94,15 @@ export const sendMessage = async (req, res) => {
     let systemContent = "You are Semester Mentor AI. Help the student with their academic inquiries.";
 
     if (chatSession.subject) {
-      const Subject = (await import('../models/Subject.js')).default;
-      const Topic = (await import('../models/Topic.js')).default;
-      
       const subjectDoc = await Subject.findById(chatSession.subject);
       if (subjectDoc) {
         const topics = await Topic.find({ subject: subjectDoc._id });
-        const completedTopics = topics.filter(t => t.isCompleted).length;
+        const completedTopics = topics.filter(t => t.completed).length;
         
         systemContent += `\nThe student is asking about the subject: "${subjectDoc.name}". `;
         if (topics.length > 0) {
           systemContent += `They have completed ${completedTopics} out of ${topics.length} modules. `;
-          systemContent += `Here are the modules:\n` + topics.map((t, i) => `${i+1}. ${t.title} (${t.isCompleted ? 'Completed' : 'Not Completed'})`).join('\n');
+          systemContent += `Here are the modules:\n` + topics.map((t, i) => `${i+1}. ${t.title} (${t.completed ? 'Completed' : 'Not Completed'})`).join('\n');
         } else {
           systemContent += `The student has not uploaded a syllabus for this subject yet.`;
         }

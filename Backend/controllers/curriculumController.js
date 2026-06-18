@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import fs from "fs";
+import fs from "fs/promises";
 import Subject from "../models/subjectModel.js";
 import Topic from "../models/topicModel.js";
 import { parseTopicsFromSyllabusFile } from "../services/syllabusParserService.js";
@@ -43,7 +43,7 @@ export const parseSubjectsFromCurriculum = async (req, res) => {
 
     const filePart = {
       inlineData: {
-        data: fs.readFileSync(req.file.path).toString("base64"),
+        data: (await fs.readFile(req.file.path)).toString("base64"),
         mimeType: req.file.mimetype,
       },
     };
@@ -79,14 +79,14 @@ export const parseSubjectsFromCurriculum = async (req, res) => {
     }));
 
     const savedSubjects = await Subject.insertMany(subjectsToSave);
-    fs.unlinkSync(req.file.path); // Clean up the temp file
+    await fs.unlink(req.file.path); // Clean up the temp file
 
     res.status(201).json({
       message: `Added ${savedSubjects.length} subjects!`,
       subjects: savedSubjects,
     });
   } catch (error) {
-    if (req.file) fs.unlinkSync(req.file.path);
+    if (req.file) await fs.unlink(req.file.path).catch(() => { });
     res
       .status(500)
       .json({ message: "Subject parsing failed", error: error.message });
@@ -119,14 +119,14 @@ export const parseTopicsForSubject = async (req, res) => {
     }));
 
     const savedTopics = await Topic.insertMany(topicsToSave);
-    fs.unlinkSync(req.file.path); // Clean up
+    await fs.unlink(req.file.path); // Clean up
 
     res.status(201).json({
       message: `Added ${savedTopics.length} topics!`,
       topics: savedTopics,
     });
   } catch (error) {
-    if (req.file) fs.unlinkSync(req.file.path);
+    if (req.file) await fs.unlink(req.file.path).catch(() => { });
     res
       .status(500)
       .json({ message: "Topic parsing failed", error: error.message });

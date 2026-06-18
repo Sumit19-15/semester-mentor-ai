@@ -20,7 +20,7 @@ const chatSessionSchema = mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["GLOBAL", "MODULE"],
+      enum: ["GLOBAL", "MODULE", "SUBJECT"],
       default: "MODULE",
     },
     title: {
