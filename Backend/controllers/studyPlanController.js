@@ -84,6 +84,7 @@ export const generateStudyPlan = async (req, res) => {
   try {
     const {
       subjectIds,
+      topicIds,
       name,
       startDate,
       endDate,
@@ -107,6 +108,7 @@ export const generateStudyPlan = async (req, res) => {
     const context = await buildStudyPlanContext({
       userId: req.user._id,
       subjectIds: normalizeSubjectIds(subjectIds),
+      topicIds: normalizeSubjectIds(topicIds),
       includeStoredResources,
     });
 

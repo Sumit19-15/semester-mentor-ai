@@ -36,3 +36,23 @@ export const getSubjects = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
+// @desc    Delete a subject
+// @route   DELETE /api/subjects/:id
+// @access  Private
+export const deleteSubject = async (req, res) => {
+  try {
+    const subject = await Subject.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+
+    if (!subject) {
+      return res.status(404).json({ message: "Subject not found" });
+    }
+
+    res.status(200).json({ message: "Subject removed" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};

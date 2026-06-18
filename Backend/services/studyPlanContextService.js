@@ -7,6 +7,7 @@ import Topic from "../models/topicModel.js";
 export const buildStudyPlanContext = async ({
   userId,
   subjectIds = [],
+  topicIds = [],
   includeStoredResources = false,
 }) => {
   const subjectQuery = { user: userId };
@@ -28,10 +29,16 @@ export const buildStudyPlanContext = async ({
 
   const selectedSubjectIds = subjects.map((subject) => subject._id);
 
-  const topics = await Topic.find({
+  const topicQuery = {
     user: userId,
     subject: { $in: selectedSubjectIds },
-  })
+  };
+
+  if (topicIds && topicIds.length > 0) {
+    topicQuery._id = { $in: topicIds };
+  }
+
+  const topics = await Topic.find(topicQuery)
     .sort({ createdAt: 1 })
     .lean();
 

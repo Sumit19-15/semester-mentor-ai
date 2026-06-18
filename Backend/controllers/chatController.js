@@ -52,7 +52,7 @@ export const createChatSession = async (req, res) => {
 export const getChatMessages = async (req, res) => {
   try {
     const chatSession = await ChatSession.findOne({ _id: req.params.id, user: req.user._id });
-    
+
     if (!chatSession) {
       return res.status(404).json({ message: "Chat session not found" });
     }
@@ -89,9 +89,29 @@ export const sendMessage = async (req, res) => {
       .sort({ createdAt: 1 })
       .limit(10);
 
-    // Format for AI provider
+    let systemContent = "You are Semester Mentor AI. Help the student with their academic inquiries.";
+
+    if (chatSession.subject) {
+      const Subject = (await import('../models/Subject.js')).default;
+      const Topic = (await import('../models/Topic.js')).default;
+      
+      const subjectDoc = await Subject.findById(chatSession.subject);
+      if (subjectDoc) {
+        const topics = await Topic.find({ subject: subjectDoc._id });
+        const completedTopics = topics.filter(t => t.isCompleted).length;
+        
+        systemContent += `\nThe student is asking about the subject: "${subjectDoc.name}". `;
+        if (topics.length > 0) {
+          systemContent += `They have completed ${completedTopics} out of ${topics.length} modules. `;
+          systemContent += `Here are the modules:\n` + topics.map((t, i) => `${i+1}. ${t.title} (${t.isCompleted ? 'Completed' : 'Not Completed'})`).join('\n');
+        } else {
+          systemContent += `The student has not uploaded a syllabus for this subject yet.`;
+        }
+      }
+    }
+
     const formattedMessages = [
-      { role: "system", content: "You are Semester Mentor AI. Help the student with their academic inquiries." },
+      { role: "system", content: systemContent },
       ...history.map(msg => ({
         role: msg.role === "ai" ? "assistant" : "user",
         content: msg.content
@@ -100,7 +120,7 @@ export const sendMessage = async (req, res) => {
 
     // 3. Get AI Response
     const abortController = new AbortController();
-    
+
     req.on('close', () => {
       abortController.abort();
     });
@@ -143,7 +163,7 @@ export const deleteChatSession = async (req, res) => {
 
     // Delete all messages in the session
     await ChatMessage.deleteMany({ chatSession: chatSession._id });
-    
+
     // Delete the session itself
     await ChatSession.deleteOne({ _id: chatSession._id });
 
@@ -159,14 +179,14 @@ export const deleteChatSession = async (req, res) => {
 export const updateChatSession = async (req, res) => {
   try {
     const { title } = req.body;
-    
+
     const chatSession = await ChatSession.findOne({ _id: req.params.id, user: req.user._id });
     if (!chatSession) {
       return res.status(404).json({ message: "Chat session not found" });
     }
 
     if (title) chatSession.title = title;
-    
+
     chatSession.updatedAt = Date.now();
     const updatedChat = await chatSession.save();
 
