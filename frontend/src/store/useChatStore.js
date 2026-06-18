@@ -33,11 +33,11 @@ export const useChatStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await api.post('/chats', sessionData);
-      set((state) => ({ 
+      set((state) => ({
         sessions: [response.data, ...state.sessions],
         activeSession: response.data,
         activeMessages: [], // brand new session has no messages
-        isLoading: false 
+        isLoading: false
       }));
       return response.data;
     } catch (error) {
@@ -100,8 +100,8 @@ export const useChatStore = create((set, get) => ({
     const tempId = Date.now().toString();
     const optimisticUserMsg = { _id: tempId, role: 'user', content, createdAt: new Date().toISOString() };
     const controller = new AbortController();
-    
-    set({ 
+
+    set({
       activeMessages: [...activeMessages, optimisticUserMsg],
       isSending: true,
       error: null,
@@ -112,7 +112,7 @@ export const useChatStore = create((set, get) => ({
       const response = await api.post(`/chats/${activeSession._id}/message`, { content }, {
         signal: controller.signal
       });
-      
+
       // response.data contains { userMessage, aiMessage }
       // Replace optimistic message and append AI message
       set((state) => ({
@@ -122,21 +122,28 @@ export const useChatStore = create((set, get) => ({
       }));
     } catch (error) {
       if (axios.isCancel(error) || error.name === 'CanceledError' || error.code === 'ERR_CANCELED' || error.message === 'canceled') {
-        // Request was cancelled by the user. Remove the optimistic message.
-        set((state) => ({ 
-          activeMessages: state.activeMessages.filter(msg => msg._id !== tempId),
+        // Request was cancelled by the user. 
+        // We do NOT remove the optimistic message here because it was likely already saved to the DB before generation started.
+        // We will just clear the sending state.
+        set({
           isSending: false,
-          abortController: null 
-        }));
+          abortController: null
+        });
+        
+        // Optionally, refetch messages to get the real DB ID for the user message
+        const { activeSession } = get();
+        if (activeSession) {
+          get().setActiveSession(activeSession);
+        }
         return;
       }
-      
+
       // Remove optimistic message on failure
-      set((state) => ({ 
+      set((state) => ({
         activeMessages: state.activeMessages.filter(msg => msg._id !== tempId),
-        error: error.response?.data?.message || 'Failed to send message', 
+        error: error.response?.data?.message || 'Failed to send message',
         isSending: false,
-        abortController: null 
+        abortController: null
       }));
     }
   },

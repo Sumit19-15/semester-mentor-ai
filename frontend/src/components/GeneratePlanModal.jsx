@@ -10,7 +10,13 @@ export default function GeneratePlanModal({ isOpen, onClose, subjectId }) {
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { fetchStudyPlansForSubject, setActiveStudyPlan, setActiveTab } = useSubjectStore(); // Wait, activeTab is local in SubjectWorkspacePage. We'll handle it via callback.
+  const { fetchStudyPlansForSubject, activeSubject } = useSubjectStore();
+
+  const [planScope, setPlanScope] = useState('subject');
+  const [selectedTopicIds, setSelectedTopicIds] = useState([]);
+  
+  // The active subject from the store already has its topics loaded in SubjectWorkspacePage
+  const planTopics = activeSubject?.topics || [];
 
   if (!isOpen) return null;
 
@@ -18,13 +24,19 @@ export default function GeneratePlanModal({ isOpen, onClose, subjectId }) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await api.post('/study-plans/generate', {
+      const payload = {
         subjectIds: [subjectId],
         name: name || 'Study Plan',
         startDate,
         endDate,
         dailyStudyHours: Number(dailyStudyHours)
-      });
+      };
+
+      if (planScope === 'module' && selectedTopicIds.length > 0) {
+        payload.topicIds = selectedTopicIds;
+      }
+
+      const response = await api.post('/study-plans/generate', payload);
       
       await fetchStudyPlansForSubject(subjectId);
       // Try to find the new plan to set as active
@@ -94,6 +106,55 @@ export default function GeneratePlanModal({ isOpen, onClose, subjectId }) {
               required
             />
           </div>
+
+          <div className="flex flex-col gap-1.5 mt-2">
+            <label className="font-label-md text-[14px] font-semibold text-on-surface">Plan Scope</label>
+            <div className="flex bg-surface-variant p-1 rounded-xl">
+              <button 
+                type="button"
+                onClick={() => setPlanScope('subject')}
+                className={`flex-1 py-2 text-[13px] font-semibold rounded-lg transition-all ${planScope === 'subject' ? 'bg-surface shadow-sm text-primary' : 'text-secondary hover:text-on-surface'}`}
+              >
+                Entire Subject
+              </button>
+              <button 
+                type="button"
+                onClick={() => setPlanScope('module')}
+                className={`flex-1 py-2 text-[13px] font-semibold rounded-lg transition-all ${planScope === 'module' ? 'bg-surface shadow-sm text-primary' : 'text-secondary hover:text-on-surface'}`}
+              >
+                Specific Modules
+              </button>
+            </div>
+          </div>
+
+          {planScope === 'module' && (
+            <div className="flex flex-col gap-1.5 mt-2">
+              <label className="font-label-md text-[14px] font-semibold text-on-surface">Select Modules</label>
+              {planTopics.length === 0 ? (
+                <div className="p-4 bg-surface-container-lowest border border-outline-variant rounded-xl text-center text-[13px] text-secondary">
+                  No modules found for this subject.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 max-h-[150px] overflow-y-auto custom-scrollbar p-1">
+                  {planTopics.map(topic => (
+                    <label key={topic._id} className="flex items-center gap-3 p-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedTopicIds.includes(topic._id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedTopicIds([...selectedTopicIds, topic._id]);
+                          else setSelectedTopicIds(selectedTopicIds.filter(id => id !== topic._id));
+                        }}
+                        className="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary"
+                      />
+                      <span className="text-[14px] text-on-surface font-medium">{topic.title}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 mt-2">
             <button 
               type="button" 

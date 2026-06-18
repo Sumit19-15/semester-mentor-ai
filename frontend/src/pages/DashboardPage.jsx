@@ -2,17 +2,30 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useSubjectStore } from '../store/useSubjectStore';
 import DashboardLayout from '../layouts/DashboardLayout';
-import { FileText, Plus, Calendar } from 'lucide-react';
+import { FileText, Plus, Calendar, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import AddSubjectModal from '../components/AddSubjectModal';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
+import toast from 'react-hot-toast';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const { subjects, fetchSubjects, isLoading, fetchAllTopics, allTopics, setActiveSubject } = useSubjectStore();
+  const { subjects, fetchSubjects, isLoading, fetchAllTopics, allTopics, setActiveSubject, deleteSubject } = useSubjectStore();
   const navigate = useNavigate();
   const userName = user?.name?.split(' ')[0] || 'Student';
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
+  const [subjectToDelete, setSubjectToDelete] = useState(null);
+
+  const handleConfirmDelete = async () => {
+    if (!subjectToDelete) return;
+    try {
+      await deleteSubject(subjectToDelete._id);
+      toast.success('Subject deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete subject');
+    }
+  };
 
   useEffect(() => {
     fetchSubjects();
@@ -91,35 +104,57 @@ export default function DashboardPage() {
         {isLoading ? (
           <div className="text-secondary">Loading subjects...</div>
         ) : subjects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-stack_md">
-            {subjects.slice(0, 6).map((sub) => {
-              // Calculate completion percentage based on topics if available
-              const completedTopics = sub.topics?.filter(t => t.completed).length || 0;
-              const totalTopics = sub.topics?.length || 1;
-              const completion = sub.topics?.length > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <AnimatePresence>
+              {subjects.map((sub) => {
+                const totalTopics = allTopics[sub._id]?.length || 0;
+                const completedTopics = allTopics[sub._id]?.filter(t => t.completed).length || 0;
+                const completion = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
-              return (
-                <div key={sub._id} className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px]" onClick={() => { setActiveSubject(sub); navigate('/subjects'); }}>
-                  <div className="flex justify-between items-start mb-4">
-                    <h4 className="font-headline-sm text-headline-sm text-on-surface leading-tight">{sub.name}</h4>
-                    {sub.courseCode && (
-                      <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap ml-2">
-                        {sub.courseCode}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-auto pt-4">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-label-sm text-label-sm text-secondary">Syllabus Completion</span>
-                      <span className="font-label-sm text-label-sm text-on-surface-variant">{completion}%</span>
+                return (
+                  <motion.div 
+                    key={sub._id} 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                    transition={{ duration: 0.2 }}
+                    className="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack_md flex flex-col hover:shadow-md hover:border-outline-variant transition-all duration-150 cursor-pointer min-h-[140px] group" 
+                    onClick={() => { setActiveSubject(sub); navigate('/subjects'); }}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <h4 className="font-headline-sm text-headline-sm text-on-surface leading-tight pr-3">{sub.name}</h4>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {sub.courseCode && (
+                          <span className="bg-surface-container text-on-surface-variant font-label-sm text-label-sm px-2 py-1 rounded-full whitespace-nowrap">
+                            {sub.courseCode}
+                          </span>
+                        )}
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            setSubjectToDelete(sub);
+                          }}
+                          className="text-secondary opacity-0 group-hover:opacity-100 transition-opacity hover:text-error p-1 rounded-md hover:bg-error/10"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
-                      <div className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${completion}%` }}></div>
+                    <div className="mt-auto pt-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-label-sm text-label-sm text-secondary">Syllabus Completion</span>
+                        <span className="font-label-sm text-label-sm font-semibold text-on-surface">{completion}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${completion}%` }}></div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+            
+            {/* Add Subject Card */}
           </div>
         ) : (
           <div className="text-secondary bg-surface-container-lowest p-6 rounded-lg border border-outline-variant text-center">
@@ -163,6 +198,13 @@ export default function DashboardPage() {
       <AddSubjectModal 
         isOpen={isAddSubjectModalOpen} 
         onClose={() => setIsAddSubjectModalOpen(false)} 
+      />
+      <ConfirmDeleteModal 
+        isOpen={!!subjectToDelete}
+        onClose={() => setSubjectToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Subject"
+        message={`Are you sure you want to delete "${subjectToDelete?.name}"? This action cannot be undone.`}
       />
     </DashboardLayout>
   );

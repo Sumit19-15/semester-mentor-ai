@@ -107,7 +107,7 @@ export default function SubjectOverviewTab({ setActiveTab }) {
                       type="checkbox" 
                       checked={topic.completed}
                       onChange={(e) => handleComplete(e, topic._id)}
-                      className="w-4 h-4 rounded text-primary focus:ring-primary cursor-pointer border-outline-variant"
+                      className="w-4 h-4 cursor-pointer accent-primary shrink-0"
                     />
                     Mark Complete
                   </label>

@@ -133,6 +133,26 @@ export const useSubjectStore = create((set, get) => ({
     }
   },
 
+  // Delete a subject
+  deleteSubject: async (subjectId) => {
+    try {
+      await api.delete(`/subjects/${subjectId}`);
+      set((state) => {
+        const newSubjects = state.subjects.filter(sub => sub._id !== subjectId);
+        const newActiveSubject = state.activeSubject?._id === subjectId 
+          ? (newSubjects.length > 0 ? newSubjects[0] : null) 
+          : state.activeSubject;
+          
+        return {
+          subjects: newSubjects,
+          activeSubject: newActiveSubject
+        };
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+
   studyPlans: [],
   activeStudyPlan: null,
 
