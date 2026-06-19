@@ -107,8 +107,9 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AnimatePresence>
               {subjects.map((sub) => {
-                const totalTopics = allTopics[sub._id]?.length || 0;
-                const completedTopics = allTopics[sub._id]?.filter(t => t.completed).length || 0;
+                const subjectTopics = allTopics.filter(t => t.subject?._id === sub._id || t.subject === sub._id);
+                const totalTopics = subjectTopics.length;
+                const completedTopics = subjectTopics.filter(t => t.completed).length;
                 const completion = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
                 return (
@@ -173,7 +174,12 @@ export default function DashboardPage() {
           {allTopics.length > 0 ? allTopics.slice(0, 8).map((topicItem, idx) => (
             <button 
               key={topicItem._id || idx} 
-              onClick={() => navigate('/module-chat')}
+              onClick={() => {
+                if (topicItem.subject) {
+                  setActiveSubject(topicItem.subject);
+                }
+                navigate('/subjects');
+              }}
               className="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack_md text-left hover:shadow-sm hover:border-primary/50 transition-all duration-200 group flex flex-col h-full"
             >
               <div className="w-10 h-10 rounded bg-secondary-container/30 flex items-center justify-center text-primary group-hover:bg-primary-container/20 transition-colors shrink-0">
