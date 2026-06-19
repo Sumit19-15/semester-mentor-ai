@@ -23,7 +23,7 @@ export const startCronJobs = () => {
         const activePlans = await StudyPlan.find({
           user: user._id,
           isCompleted: false,
-          startDate: { $lte: new Date() } // Plan has started
+          startDate: { $lte: new Date() }
         });
 
         if (!activePlans.length) continue;
@@ -38,12 +38,12 @@ export const startCronJobs = () => {
           // Find today's tasks
           const start = new Date(plan.startDate);
           start.setHours(0, 0, 0, 0);
-          
+
           const diffTime = Math.abs(today - start);
           const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          
+
           const todaysTasks = planData.daily[diffDays];
-          
+
           if (todaysTasks) {
             hasTasksForToday = true;
             planHtml += `<h3>Subject: ${todaysTasks.subject || plan.name}</h3>`;
