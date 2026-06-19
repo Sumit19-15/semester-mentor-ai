@@ -12,7 +12,10 @@ import noteRoutes from "./routes/noteRoutes.js";
 import pyqRoutes from "./routes/pyqRoutes.js";
 import studyPlanRoutes from "./routes/studyPlanRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import { startCronJobs } from "./services/cronService.js";
+
 connectDB();
+startCronJobs();
 const __dirname = path.resolve();
 
 const app = express();

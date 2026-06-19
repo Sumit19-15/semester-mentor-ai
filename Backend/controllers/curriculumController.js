@@ -1,7 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import fs from "fs/promises";
+import crypto from "crypto";
 import Subject from "../models/subjectModel.js";
 import Topic from "../models/topicModel.js";
+import CurriculumCache from "../models/CurriculumCacheModel.js";
 import { parseTopicsFromSyllabusFile } from "../services/syllabusParserService.js";
 
 const ai = new GoogleGenAI({}); // It automatically uses process.env.GEMINI_API_KEY
@@ -41,35 +43,53 @@ export const parseSubjectsFromCurriculum = async (req, res) => {
         .status(400)
         .json({ message: "Please upload an index page image or PDF." });
 
-    const filePart = {
-      inlineData: {
-        data: (await fs.readFile(req.file.path)).toString("base64"),
-        mimeType: req.file.mimetype,
-      },
-    };
+    const fileBuffer = await fs.readFile(req.file.path);
+    const hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
 
-    const prompt = `Analyze this curriculum index document. Extract a clean list of all the individual academic subjects or courses listed. Also extract their corresponding course codes if available.`;
+    let subjectsArray = [];
 
-    const response = await generateContentWithRetry({
-      model: "gemini-2.5-flash",
-      contents: [filePart, prompt],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              name: { type: Type.STRING },
-              courseCode: { type: Type.STRING },
+    // Check Cache
+    const cachedCurriculum = await CurriculumCache.findOne({ hash });
+    if (cachedCurriculum) {
+      console.log("🟢 CACHE HIT: Curriculum Index duplicate found! Serving subjects from database instead of using AI.");
+      subjectsArray = cachedCurriculum.subjects;
+    } else {
+      const filePart = {
+        inlineData: {
+          data: fileBuffer.toString("base64"),
+          mimeType: req.file.mimetype,
+        },
+      };
+
+      const prompt = `Analyze this curriculum index document. Extract a clean list of all the individual academic subjects or courses listed. Also extract their corresponding course codes if available.`;
+
+      const response = await generateContentWithRetry({
+        model: "gemini-2.5-flash",
+        contents: [filePart, prompt],
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING },
+                courseCode: { type: Type.STRING },
+              },
+              required: ["name"],
             },
-            required: ["name"],
           },
         },
-      },
-    });
+      });
+      subjectsArray = JSON.parse(response.text);
 
-    const subjectsArray = JSON.parse(response.text);
+      // Save to Cache
+      try {
+        await CurriculumCache.create({ hash, subjects: subjectsArray });
+      } catch (err) {
+        console.error("Failed to cache curriculum subjects:", err);
+      }
+    }
 
     // Map the array to include the logged-in student's ID
     const subjectsToSave = subjectsArray.map((sub) => ({

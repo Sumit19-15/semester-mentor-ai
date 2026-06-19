@@ -10,12 +10,10 @@ const chatSessionSchema = mongoose.Schema(
     subject: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subject",
-      // Optional, allowing null for Global Mentoring sessions
     },
     topic: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Topic",
-      // Optional, allowing null for Global Mentoring sessions
     },
     type: {
       type: String,

@@ -1,5 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import fs from "fs/promises";
+import crypto from "crypto";
+import SyllabusCache from "../models/SyllabusCacheModel.js";
 
 const ai = new GoogleGenAI({});
 
@@ -29,9 +31,21 @@ const generateContentWithRetry = async (request, attempts = 3) => {
 };
 
 export const parseTopicsFromSyllabusFile = async ({ filePath, mimeType }) => {
+  const fileBuffer = await fs.readFile(filePath);
+  
+  // Calculate hash for deduplication
+  const hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+  
+  // Check Cache
+  const cachedSyllabus = await SyllabusCache.findOne({ hash });
+  if (cachedSyllabus) {
+    console.log("🟢 CACHE HIT: Syllabus duplicate found! Serving topics from database instead of using AI.");
+    return cachedSyllabus.topics;
+  }
+
   const filePart = {
     inlineData: {
-      data: (await fs.readFile(filePath)).toString("base64"),
+      data: fileBuffer.toString("base64"),
       mimeType,
     },
   };
@@ -149,6 +163,13 @@ Return only valid JSON.
   });
 
   const parsed = JSON.parse(response.text);
+
+  // Save to Cache
+  try {
+    await SyllabusCache.create({ hash, topics: parsed.topics });
+  } catch (err) {
+    console.error("Failed to cache syllabus:", err);
+  }
 
   return parsed.topics;
 };

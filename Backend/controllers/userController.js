@@ -109,14 +109,14 @@ export const updateUserProfile = async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (user) {
-      user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
-      user.collegeName = req.body.collegeName || user.collegeName;
-      user.branch = req.body.branch || user.branch;
-      user.semester = req.body.semester || user.semester;
-      user.interests = req.body.interests || user.interests;
-      user.dailyFreeHours = req.body.dailyFreeHours || user.dailyFreeHours;
-      user.subjects = req.body.subjects || user.subjects;
+      if (req.body.name !== undefined) user.name = req.body.name;
+      if (req.body.email !== undefined) user.email = req.body.email;
+      if (req.body.collegeName !== undefined) user.collegeName = req.body.collegeName;
+      if (req.body.branch !== undefined) user.branch = req.body.branch;
+      if (req.body.semester !== undefined) user.semester = req.body.semester;
+      if (req.body.interests !== undefined) user.interests = req.body.interests;
+      if (req.body.dailyFreeHours !== undefined) user.dailyFreeHours = req.body.dailyFreeHours;
+      if (req.body.subjects !== undefined) user.subjects = req.body.subjects;
 
       if (req.body.password) {
         if (!req.body.oldPassword) {
@@ -135,9 +135,13 @@ export const updateUserProfile = async (req, res) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
-        subjects: updatedUser.subjects,
+        collegeName: updatedUser.collegeName,
+        branch: updatedUser.branch,
+        semester: updatedUser.semester,
         interests: updatedUser.interests,
         dailyFreeHours: updatedUser.dailyFreeHours,
+        subjects: updatedUser.subjects,
+        token: generateToken(updatedUser._id),
       });
     } else {
       res.status(404).json({ message: "User not found" });
@@ -155,12 +159,12 @@ export const logoutUser = async (req, res) => {
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
       token = req.headers.authorization.split(" ")[1];
     }
-    
+
     if (token) {
       const TokenBlacklist = (await import("../models/TokenBlacklistModel.js")).default;
       await TokenBlacklist.create({ token });
     }
-    
+
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Error in logoutUser:", error.message);
