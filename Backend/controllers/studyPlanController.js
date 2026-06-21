@@ -180,15 +180,16 @@ export const generateStudyPlan = async (req, res) => {
   }
 };
 
-// @desc    Get all study plans for a specific subject
+// @desc    Get all study plans for a specific subject or all subjects
 // @route   GET /api/study-plans/:subjectId
 // @access  Private
 export const getStudyPlans = async (req, res) => {
   try {
-    const plans = await StudyPlan.find({ 
-      user: req.user._id, 
-      subject: req.params.subjectId 
-    }).sort({ createdAt: -1 });
+    const query = { user: req.user._id };
+    if (req.params.subjectId && req.params.subjectId !== 'all') {
+      query.subject = req.params.subjectId;
+    }
+    const plans = await StudyPlan.find(query).sort({ createdAt: -1 });
     
     res.status(200).json(plans);
   } catch (error) {
