@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import ThemeToggle from './ThemeToggle';
-import { BookOpen, Search, Bell, HelpCircle, LogOut, Settings } from 'lucide-react';
+import { BookOpen, Bell, HelpCircle, LogOut, Settings, GraduationCap } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export default function TopNavBar() {
@@ -31,20 +31,19 @@ export default function TopNavBar() {
 
   const isMarketingPage = location.pathname === '/';
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  const isDashboardPage = location.pathname === '/dashboard' || 
-                          location.pathname.startsWith('/subjects') ||
-                          location.pathname.startsWith('/module-chat') || 
-                          location.pathname.startsWith('/chats') || 
-                          location.pathname.startsWith('/settings');
+  const isDashboardPage = location.pathname === '/dashboard' ||
+    location.pathname.startsWith('/subjects') ||
+    location.pathname.startsWith('/module-chat') ||
+    location.pathname.startsWith('/chats') ||
+    location.pathname.startsWith('/settings');
 
-  // If dashboard, it shifts right by 240px on desktop
+
   const navClasses = isDashboardPage
-    ? `h-navbar_height fixed top-0 right-0 left-0 md:left-[240px] z-10 bg-surface border-b border-outline-variant flex justify-between items-center px-gutter transition-all duration-300`
-    : `w-full h-navbar_height fixed top-0 left-0 z-50 transition-all duration-300 border-b flex justify-between items-center px-gutter ${
-        scrolled || isAuthPage
-          ? 'bg-surface/95 backdrop-blur-sm shadow-sm border-outline-variant' 
-          : 'bg-surface/90 border-transparent'
-      }`;
+    ? `h-navbar_height fixed top-4 right-4 left-4 md:left-[272px] z-10 bg-surface/90 backdrop-blur-md rounded-2xl flex justify-between items-center px-gutter transition-all duration-300`
+    : `h-navbar_height fixed top-4 left-4 right-4 z-50 transition-all duration-300 flex justify-between items-center px-gutter rounded-2xl ${scrolled || isAuthPage
+      ? 'bg-surface/95 backdrop-blur-md'
+      : 'bg-transparent'
+    }`;
 
   return (
     <nav className={navClasses}>
@@ -55,9 +54,11 @@ export default function TopNavBar() {
         </div>
       ) : (
         <div className="flex items-center gap-stack_sm">
-          <Link to="/" className="flex items-center gap-stack_sm">
-            <BookOpen className="text-primary w-6 h-6" />
-            <span className="font-headline-sm text-[18px] leading-[24px] font-bold text-primary">
+          <Link to="/" className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-[var(--color-sidebar-brand-bg)] flex items-center justify-center shrink-0 shadow-sm transition-colors duration-200">
+              <GraduationCap className="w-6 h-6 text-[var(--color-sidebar-brand-icon)]" />
+            </div>
+            <span className="font-headline-sm text-[18px] leading-[24px] font-bold text-[var(--color-sidebar-brand-text)]">
               Semester Mentor
             </span>
           </Link>
@@ -67,7 +68,7 @@ export default function TopNavBar() {
       {/* Right Side */}
       <div className="flex items-center gap-stack_md ml-auto">
         <ThemeToggle />
-        
+
         {isMarketingPage && !user && (
           <>
             <Link
@@ -84,7 +85,7 @@ export default function TopNavBar() {
             </Link>
           </>
         )}
-        
+
         {isMarketingPage && user && (
           <Link
             to="/dashboard"
@@ -103,18 +104,18 @@ export default function TopNavBar() {
               <HelpCircle className="w-5 h-5" />
             </button>
             <div className="relative" ref={dropdownRef}>
-              <button 
+              <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-md text-label-md ml-stack_sm cursor-pointer border border-surface-variant uppercase shadow-sm hover:opacity-90 transition-opacity"
               >
-                {user?.name ? user.name[0] : 'S'}
+                {user?.name ? user.name[0] : 'SM'}
               </button>
-              
+
               {isProfileOpen && (
                 <div className="absolute top-12 right-0 w-64 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant overflow-hidden z-50">
                   <div className="p-4 border-b border-outline-variant/50 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-headline-sm uppercase shrink-0 shadow-sm border border-primary/20">
-                      {user?.name ? user.name[0] : 'S'}
+                      {user?.name ? user.name[0] : 'SM'}
                     </div>
                     <div className="min-w-0">
                       <p className="font-headline-sm text-[14px] font-bold text-on-surface truncate">{user?.name}</p>
@@ -122,7 +123,7 @@ export default function TopNavBar() {
                     </div>
                   </div>
                   <div className="p-2">
-                    <Link 
+                    <Link
                       to="/settings"
                       onClick={() => setIsProfileOpen(false)}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container transition-colors text-on-surface"
@@ -130,7 +131,7 @@ export default function TopNavBar() {
                       <Settings className="w-4 h-4 text-secondary" />
                       <span className="font-label-md text-[13px] font-medium">Settings</span>
                     </Link>
-                    <button 
+                    <button
                       onClick={() => {
                         setIsProfileOpen(false);
                         logout();

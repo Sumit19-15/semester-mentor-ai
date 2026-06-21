@@ -143,8 +143,8 @@ export default function SubjectWorkspacePage() {
       <div className="flex w-full h-full overflow-hidden">
         
         {/* Inner Sidebar for Subjects */}
-        <aside className="w-[280px] h-full bg-surface border-r border-outline-variant flex flex-col shrink-0 relative z-20">
-          <div className="p-4 border-b border-outline-variant/50 shrink-0 flex flex-col gap-3">
+        <aside className="w-[280px] h-full bg-surface flex flex-col shrink-0 relative z-20 min-h-0">
+          <div className="p-4 border-b border-outline-variant/30 shrink-0 flex flex-col gap-3">
             <div className="flex items-center gap-2 text-secondary">
               <BookOpen className="w-[18px] h-[18px]" />
               <span className="font-label-sm text-[11px] font-semibold uppercase tracking-wider">Subject</span>
@@ -154,14 +154,14 @@ export default function SubjectWorkspacePage() {
             </h3>
             
             <button 
-              className="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-md text-[14px] py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors duration-150 shadow-sm font-semibold mt-1"
+              className="w-full bg-[#D97706] dark:bg-primary hover:bg-[#B45309] dark:hover:bg-primary/90 text-white dark:text-on-primary font-label-md text-[14px] py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors duration-150 shadow-sm font-semibold mt-1"
               onClick={() => setIsAddSubjectModalOpen(true)}
             >
               <Plus className="w-4 h-4" />
               Add Subject
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 flex flex-col gap-1">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 flex flex-col gap-1 min-h-0">
             <div className="px-3 py-2 font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider mt-2 mb-1 font-semibold border-t border-outline-variant/30 pt-2">All Subjects</div>
             
             <AnimatePresence>
@@ -173,10 +173,10 @@ export default function SubjectWorkspacePage() {
                   exit={{ opacity: 0, height: 0, scale: 0.95, margin: 0, padding: 0 }}
                   transition={{ duration: 0.2 }}
                   onClick={() => setActiveSubject(sub)}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between group ${activeSubject._id === sub._id ? 'bg-surface-container-high' : 'hover:bg-surface-container'}`}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors flex items-center justify-between group ${activeSubject._id === sub._id ? 'bg-[#FFF5E6] dark:bg-primary-container/30 border-l-2 border-[#D97706] dark:border-primary' : 'hover:bg-surface-container border-l-2 border-transparent'}`}
                 >
                   <div className="flex flex-col gap-0.5 overflow-hidden">
-                    <span className={`font-label-md text-[14px] font-semibold truncate transition-colors ${activeSubject._id === sub._id ? 'text-primary' : 'text-on-surface group-hover:text-primary'}`}>{sub.name}</span>
+                    <span className={`font-label-md text-[14px] font-semibold truncate transition-colors ${activeSubject._id === sub._id ? 'text-[#D97706] dark:text-primary' : 'text-on-surface group-hover:text-primary'}`}>{sub.name}</span>
                     {sub.courseCode && <span className="font-label-sm text-[10px] text-on-surface-variant truncate">{sub.courseCode}</span>}
                   </div>
                   <div 
@@ -208,13 +208,16 @@ export default function SubjectWorkspacePage() {
             {/* Page Header */}
             <div className="mb-8" data-purpose="workspace-header">
               {activeSubject.courseCode && (
-                <div className="flex items-center font-label-sm text-[12px] text-secondary uppercase tracking-widest mb-3 font-semibold">
+                <div className="flex items-center font-medium text-[12px] text-secondary tracking-widest mb-1 uppercase">
                   <span>{activeSubject.courseCode}</span>
                 </div>
               )}
               <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
-                <h1 className="font-display-lg text-[32px] font-bold text-on-surface tracking-tight max-w-2xl leading-tight">
+                <h1 className="text-[32px] font-bold text-on-surface tracking-tight max-w-2xl leading-tight flex items-center gap-3">
                   {activeSubject.name}
+                  <button className="w-8 h-8 rounded-lg bg-[#FFF5E6] dark:bg-primary-container/30 text-[#D97706] dark:text-primary flex items-center justify-center shrink-0 hover:bg-[#FFE8CC] dark:hover:bg-primary-container/50 transition-colors">
+                    <Sparkles className="w-4 h-4" />
+                  </button>
                 </h1>
                 <div className="flex gap-3 shrink-0">
                   <input 
@@ -227,14 +230,14 @@ export default function SubjectWorkspacePage() {
                   <button 
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isParsing}
-                    className="flex items-center gap-2 px-4 py-2 border border-outline-variant bg-surface-container-lowest rounded-lg font-label-md text-[14px] font-semibold text-on-surface hover:bg-surface-container transition-all shadow-sm disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 border border-outline-variant/50 bg-white dark:bg-surface-container-lowest rounded-lg font-medium text-[14px] text-on-surface hover:bg-surface-container-low transition-all shadow-sm disabled:opacity-50"
                   >
-                    {isParsing ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Upload className="w-4 h-4 text-primary" />}
+                    {isParsing ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Upload className="w-4 h-4 text-secondary" />}
                     {isParsing ? 'Parsing...' : (activeSubject.topics && activeSubject.topics.length > 0 ? 'Re-upload Syllabus' : 'Upload Syllabus')}
                   </button>
                   <button 
                     onClick={handleResumeLearning}
-                    className="flex items-center gap-2 px-5 py-2 bg-primary text-on-primary rounded-lg font-label-md text-[14px] font-semibold hover:opacity-90 transition-all shadow-sm"
+                    className="flex items-center gap-2 px-5 py-2 bg-[#D97706] dark:bg-primary text-white dark:text-on-primary rounded-lg font-medium text-[14px] hover:bg-[#B45309] dark:hover:bg-primary/90 transition-all shadow-sm"
                   >
                     <PlayCircle className="w-4 h-4" />
                     {studyPlans && studyPlans.length > 0 ? 'Resume Learning' : 'Start Learning'}
@@ -244,16 +247,16 @@ export default function SubjectWorkspacePage() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className="border-b border-outline-variant mb-8" data-purpose="workspace-tabs">
+            <div className="border-b border-outline-variant/30 mb-8" data-purpose="workspace-tabs">
               <nav className="flex gap-8 overflow-x-auto custom-scrollbar">
                 {['Topics', 'Study Plan', 'Resources', 'Notes', 'PYQs'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`pb-4 font-label-md text-[14px] uppercase tracking-wider whitespace-nowrap transition-colors ${
+                    className={`pb-3 font-bold text-[13px] uppercase tracking-wider whitespace-nowrap transition-colors ${
                       activeTab === tab
-                        ? 'font-bold text-primary border-b-2 border-primary'
-                        : 'font-semibold text-secondary hover:text-on-surface border-b-2 border-transparent hover:border-outline-variant'
+                        ? 'text-[#D97706] dark:text-primary border-b-2 border-[#D97706] dark:border-primary'
+                        : 'text-secondary hover:text-on-surface border-b-2 border-transparent hover:border-outline-variant/50'
                     }`}
                   >
                     {tab}

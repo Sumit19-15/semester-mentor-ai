@@ -11,7 +11,7 @@ export default function DashboardLayout({ children }) {
   return (
     <div className={`bg-background pt-[56px] ${isChatPage ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
       <SideNavBar />
-      <main className={`md:ml-[240px] transition-all duration-300 ${isChatPage ? 'h-full flex flex-col' : 'p-stack_lg'}`}>
+      <main className={`md:ml-64 transition-all duration-300 ${isChatPage ? 'h-full flex flex-col' : 'p-stack_lg'}`}>
         <div className={`w-full ${isChatPage ? 'flex-1 h-full relative' : 'max-w-container_max_width mx-auto'}`}>
           <AnimatePresence mode="wait">
             <motion.div

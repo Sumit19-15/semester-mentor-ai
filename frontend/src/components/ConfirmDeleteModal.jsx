@@ -30,9 +30,12 @@ export default function ConfirmDeleteModal({ isOpen, onClose, onConfirm, title, 
               Cancel
             </button>
             <button 
-              onClick={() => {
-                onConfirm();
-                onClose();
+              onClick={async () => {
+                try {
+                  await onConfirm();
+                } finally {
+                  onClose();
+                }
               }}
               className="px-5 py-2 bg-error text-on-error rounded-lg font-label-md text-[14px] font-semibold hover:opacity-90 transition-all shadow-sm"
             >

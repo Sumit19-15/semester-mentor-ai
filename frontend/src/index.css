@@ -98,6 +98,36 @@
 }
 
 @layer base {
+  :root {
+    /* Sidebar Light Mode Custom Colors */
+    --color-sidebar-bg: #ffffff;
+    --color-sidebar-border: #f3f4f6;
+    --color-sidebar-brand-bg: #fbbf24;
+    --color-sidebar-brand-icon: #111827;
+    --color-sidebar-brand-text: #111827;
+    --color-sidebar-brand-sub: #6b7280;
+
+    --color-sidebar-link-text: #6b7280;
+    --color-sidebar-link-hover-bg: #fff5e6;
+    --color-sidebar-link-hover-text: #92400e;
+
+    --color-sidebar-active-bg: #fff5e6;
+    --color-sidebar-active-text: #92400e;
+    --color-sidebar-active-border: #92400e;
+
+    --color-sidebar-card-bg: #fff8ee;
+    --color-sidebar-card-title: #d97706;
+    --color-sidebar-card-text: #4b5563;
+    --color-sidebar-card-border: transparent;
+
+    /* Mountains Light Mode */
+    --color-sidebar-mountain-1: #fbe1c3;
+    --color-sidebar-mountain-2: #f3d1a5;
+    --color-sidebar-mountain-3: #e8b880;
+    --color-sidebar-flag-pole: #d97706;
+    --color-sidebar-flag: #f59e0b;
+  }
+
   .material-symbols-outlined {
     font-family: 'Material Symbols Outlined';
     font-weight: normal;
@@ -113,6 +143,7 @@
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
   }
+
   .dark {
     --color-surface-bright: #3a3a3a;
     --color-surface-container-lowest: #0f0f0f;
@@ -135,5 +166,33 @@
     --color-on-secondary: #303031;
     --color-background: #121212;
     --color-on-background: #e6e1e5;
+
+    /* Sidebar Dark Mode Custom Colors */
+    --color-sidebar-bg: #121212;
+    --color-sidebar-border: #2a2a2a;
+    --color-sidebar-brand-bg: #d97706;
+    --color-sidebar-brand-icon: #ffffff;
+    --color-sidebar-brand-text: #ffffff;
+    --color-sidebar-brand-sub: #9ca3af;
+
+    --color-sidebar-link-text: #9ca3af;
+    --color-sidebar-link-hover-bg: #431407;
+    --color-sidebar-link-hover-text: #fb923c;
+
+    --color-sidebar-active-bg: #431407;
+    --color-sidebar-active-text: #fb923c;
+    --color-sidebar-active-border: #fb923c;
+
+    --color-sidebar-card-bg: #2a180e;
+    --color-sidebar-card-title: #fbbf24;
+    --color-sidebar-card-text: #d1d5db;
+    --color-sidebar-card-border: rgba(251, 146, 60, 0.2);
+
+    /* Mountains Dark Mode */
+    --color-sidebar-mountain-1: #5c3a21;
+    --color-sidebar-mountain-2: #4a2e1b;
+    --color-sidebar-mountain-3: #3d2616;
+    --color-sidebar-flag-pole: #fb923c;
+    --color-sidebar-flag: #fbbd24;
   }
 }

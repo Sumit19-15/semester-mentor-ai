@@ -145,7 +145,11 @@ export const useSubjectStore = create((set, get) => ({
           
         return {
           subjects: newSubjects,
-          activeSubject: newActiveSubject
+          activeSubject: newActiveSubject,
+          allTopics: state.allTopics ? state.allTopics.filter(t => {
+            const topicSubjectId = typeof t.subject === 'object' ? t.subject?._id : t.subject;
+            return topicSubjectId !== subjectId;
+          }) : []
         };
       });
     } catch (error) {
@@ -203,14 +207,15 @@ export const useSubjectStore = create((set, get) => ({
       await api.delete(`/topics/${topicId}`);
       set((state) => {
         const updatedSubjects = state.subjects.map(sub => 
-          sub._id === subjectId ? { ...sub, topics: sub.topics.filter(t => t._id !== topicId) } : sub
+          sub._id === subjectId ? { ...sub, topics: (sub.topics || []).filter(t => t._id !== topicId) } : sub
         );
         const updatedActiveSubject = state.activeSubject?._id === subjectId
           ? { ...state.activeSubject, topics: state.activeSubject.topics?.filter(t => t._id !== topicId) || [] }
           : state.activeSubject;
 
         return {
-          topics: state.topics.filter(t => t._id !== topicId),
+          topics: (state.topics || []).filter(t => t._id !== topicId),
+          allTopics: state.allTopics ? state.allTopics.filter(t => t._id !== topicId) : [],
           subjects: updatedSubjects,
           activeSubject: updatedActiveSubject
         };
@@ -240,8 +245,9 @@ export const useSubjectStore = create((set, get) => ({
       set((state) => ({
         topics: state.topics.map(t => t._id === topicId ? response.data : t),
         subjects: state.subjects.map(sub => 
-          sub._id === subjectId ? { ...sub, topics: sub.topics.map(t => t._id === topicId ? response.data : t) } : sub
-        )
+          sub._id === subjectId ? { ...sub, topics: (sub.topics || []).map(t => t._id === topicId ? response.data : t) } : sub
+        ),
+        allTopics: state.allTopics ? state.allTopics.map(t => t._id === topicId ? response.data : t) : []
       }));
     } catch (error) {
       throw error;
