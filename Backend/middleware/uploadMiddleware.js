@@ -1,5 +1,12 @@
 import multer from "multer";
 import path from "path";
+import fs from "fs";
+
+const uploadDir = "uploads";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+  console.log("Created uploads folder on Render!");
+}
 
 // 1. Configure Storage
 const storage = multer.diskStorage({
@@ -8,15 +15,14 @@ const storage = multer.diskStorage({
     cb(null, "uploads/");
   },
   filename(req, file, cb) {
-    // We create a unique filename using the student's ID and the current timestamp
-    // Example: 64a1b2c3-1698765432.pdf
+    // create a unique filename using the student's ID and the current timestamp
     cb(null, `${req.user._id}-${Date.now()}${path.extname(file.originalname)}`);
   },
 });
 
-// 2. Filter for specific file types (Optional but recommended)
+// 2. Filter for specific file types
 const checkFileType = (file, cb) => {
-  const filetypes = /pdf|jpg|jpeg|png/; // Allow PDFs and basic images
+  const filetypes = /pdf|jpg|jpeg|png/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = filetypes.test(file.mimetype);
 
