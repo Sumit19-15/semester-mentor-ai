@@ -11,10 +11,8 @@ export default function TypewriterText({ text, speed = 10, isNew = false }) {
 
     let i = 0;
     setDisplayedText('');
-    
+
     const timer = setInterval(() => {
-      // Chunking by a few characters can make it feel smoother and faster for long texts,
-      // but 1 char at 10ms is already quite fast (100 chars/sec)
       setDisplayedText(text.substring(0, i + 1));
       i++;
       if (i >= text.length) {
