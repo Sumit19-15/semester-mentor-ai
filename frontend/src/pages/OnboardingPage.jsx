@@ -4,6 +4,7 @@ import { ArrowRight, ArrowLeft, Upload, FileText, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import api from '../services/api';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
@@ -239,7 +240,16 @@ export default function OnboardingPage() {
                       type="file" 
                       id="curriculum" 
                       accept="image/*,.pdf"
-                      onChange={(e) => setCurriculumFile(e.target.files[0])}
+                      onChange={(e) => {
+                        const selectedFile = e.target.files[0];
+                        if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
+                          toast.error("File size must be less than 5MB");
+                          e.target.value = null;
+                          setCurriculumFile(null);
+                        } else {
+                          setCurriculumFile(selectedFile);
+                        }
+                      }}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                     {curriculumFile ? (

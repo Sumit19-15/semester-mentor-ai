@@ -82,6 +82,12 @@ export default function SubjectWorkspacePage() {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      e.target.value = null;
+      return;
+    }
+
     if (activeSubject.topics && activeSubject.topics.length > 0) {
       setSelectedFile(file);
       setIsReuploadModalOpen(true);

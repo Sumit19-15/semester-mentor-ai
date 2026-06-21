@@ -174,7 +174,16 @@ export default function UploadFileModal({ isOpen, onClose, subjectId, uploadType
               {!file ? (
                 <input 
                   type="file"
-                  onChange={(e) => setFile(e.target.files[0])}
+                  onChange={(e) => {
+                    const selectedFile = e.target.files[0];
+                    if (selectedFile && selectedFile.size > 5 * 1024 * 1024) {
+                      toast.error("File size must be less than 5MB");
+                      e.target.value = null;
+                      setFile(null);
+                    } else {
+                      setFile(selectedFile);
+                    }
+                  }}
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                   className="w-full bg-surface-container-lowest border border-surface-variant rounded-lg px-4 py-2 font-body-md text-[14px] text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-container file:text-primary hover:file:bg-primary/20"
                   required
@@ -192,7 +201,7 @@ export default function UploadFileModal({ isOpen, onClose, subjectId, uploadType
                   </button>
                 </div>
               )}
-              <p className="text-[11px] text-secondary mt-1">Supported formats: PDF, Word, Images. Max 10MB.</p>
+              <p className="text-[11px] text-secondary mt-1">Supported formats: PDF, Word, Images. Max 5MB.</p>
             </div>
           )}
 

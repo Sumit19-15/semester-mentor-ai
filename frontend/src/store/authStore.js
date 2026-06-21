@@ -27,7 +27,6 @@ export const useAuthStore = create((set) => ({
   },
   logout: async () => {
     try {
-      // Avoid circular dependency by importing dynamically or just removing locally if api call fails
       const api = (await import('../services/api')).default;
       await api.post('/users/logout');
     } catch (error) {
