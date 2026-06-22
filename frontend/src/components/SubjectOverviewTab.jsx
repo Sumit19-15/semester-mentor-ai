@@ -14,10 +14,10 @@ export default function SubjectOverviewTab({ setActiveTab }) {
   const totalTopics = topics?.length || 1;
   const progressPercent = topics?.length > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
 
-  // Sorting items descending by createdAt
-  const sortedResources = [...(resources || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const sortedNotes = [...(notes || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const sortedPyqs = [...(pyqs || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Sorting items descending by createdAt and taking top 3
+  const sortedResources = [...(resources || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
+  const sortedNotes = [...(notes || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
+  const sortedPyqs = [...(pyqs || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
 
   const handleDeleteClick = (e, topic) => {
     e.stopPropagation();
@@ -193,7 +193,7 @@ export default function SubjectOverviewTab({ setActiveTab }) {
           <div className="flex flex-col overflow-y-auto custom-scrollbar max-h-[300px] pr-2 mb-4">
             {sortedPyqs.length > 0 ? sortedPyqs.map((pyq, index) => (
               <a key={pyq._id || index} className="flex justify-between items-center py-3 border-b border-outline-variant/30 group cursor-pointer" href={pyq.fileUrl || "#"} target="_blank" rel="noreferrer">
-                <span className="text-[13px] text-on-surface font-medium group-hover:text-primary transition-colors">{pyq.year} - {pyq.subject?.name || 'PYQ'}</span>
+                <span className="text-[13px] text-on-surface font-medium group-hover:text-primary transition-colors">{pyq.title}</span>
                 <ChevronRight className="w-4 h-4 text-secondary group-hover:text-primary transition-colors shrink-0" />
               </a>
             )) : (
